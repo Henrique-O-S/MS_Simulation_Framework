@@ -9,7 +9,7 @@ from spade.agent import Agent
 from agents.center import CenterAgent
 from agents.drone import DroneAgent
 from agents.world import WorldAgent
-from models.order import Order
+from models.region import Region
 from aux_funcs import extract_numeric_value
 
 
@@ -24,25 +24,23 @@ class Application:
         def index():
             return render_template('map.html')
 
-    def read_center_csv(self, filename):
-        centers = []
+    def read_region_csv(self, filename):
+        regions = []
         with open(filename, "r") as csvfile:
             reader = csv.reader(csvfile, delimiter=";")
             next(reader)  # Skip the header
             params = next(reader)  # Read the parameters
-            center_id, latitude, longitude, weight = params
+            region_id, latitude, longitude, avg_pop, driving_perc, avg_m_inc, S_chargers, A_chargers, B_chargers = params
             latitude = float(latitude.replace(",", "."))
             longitude = float(longitude.replace(",", "."))
-            weight = float(weight)
-            orders = []
-            for row in reader:
-                order_id, order_latitude, order_longitude, order_weight = row
-                orders.append(Order(order_id, order_latitude,
-                              order_longitude, order_weight))
-            centers.append(CenterAgent(center_id + "@localhost",
-                           "1234", center_id, latitude, longitude, weight, orders))
-        return centers
-
+            driving_perc = float(driving_perc.replace(",", "."))
+            avg_m_inc = float(avg_m_inc.replace(",", "."))
+            S_chargers = int(S_chargers)
+            A_chargers = int(A_chargers)
+            B_chargers = int(B_chargers)
+            regions.append(Region(region_id, latitude, longitude, avg_pop * driving_perc, avg_m_inc, S_chargers, A_chargers, B_chargers))
+        return regions
+        
     def read_drone_csv(self, filename):
         drones = []
         with open(filename, "r") as csvfile:
@@ -58,15 +56,14 @@ class Application:
         center_files = ["data/delivery_center1.csv",
                         "data/delivery_center2.csv"]
         drone_file = "data/delivery_drones.csv"
+        regions = []
+        region_file = "data/regions.csv"
         agents = []
         centers = []
-        for filename in center_files:
-            if os.path.exists(filename):
-                res = self.read_center_csv(filename)
-                centers.extend(res)
-                agents.extend(res)
-            #else:
-                #print(f"File {filename} not found.")
+        if os.path.exists(region_file):
+            res = self.read_region_csv(region_file)
+            regions.extend(res)
+    
         if os.path.exists(drone_file):
             drones = self.read_drone_csv(drone_file)
             for drone in drones:
