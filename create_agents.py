@@ -10,7 +10,9 @@ from agents.center import CenterAgent
 from agents.drone import DroneAgent
 from agents.world import WorldAgent
 from models.region import Region
+from models.car import Car
 from aux_funcs import extract_numeric_value
+from car_seeder import CarSeeder
 
 
 class Application:
@@ -24,23 +26,32 @@ class Application:
         def index():
             return render_template('map.html')
 
-    def read_region_csv(self, filename):
-        regions = []
+    def read_region_csv(self, filename, regions):
         with open(filename, "r") as csvfile:
             reader = csv.reader(csvfile, delimiter=";")
             next(reader)  # Skip the header
-            params = next(reader)  # Read the parameters
-            region_id, latitude, longitude, avg_pop, driving_perc, avg_m_inc, S_chargers, A_chargers, B_chargers = params
-            latitude = float(latitude.replace(",", "."))
-            longitude = float(longitude.replace(",", "."))
-            driving_perc = float(driving_perc.replace(",", "."))
-            avg_m_inc = float(avg_m_inc.replace(",", "."))
-            S_chargers = int(S_chargers)
-            A_chargers = int(A_chargers)
-            B_chargers = int(B_chargers)
-            regions.append(Region(region_id, latitude, longitude, avg_pop * driving_perc, avg_m_inc, S_chargers, A_chargers, B_chargers))
-        return regions
-        
+            for row in reader:
+                region_id, latitude, longitude, avg_pop, driving_perc, avg_m_inc, S_chargers, A_chargers, B_chargers = row
+                latitude = float(latitude.replace(",", "."))
+                longitude = float(longitude.replace(",", "."))
+                avg_pop = int(avg_pop)
+                driving_perc = float(driving_perc.replace(",", "."))
+                avg_m_inc = float(avg_m_inc.replace(",", "."))
+                S_chargers = int(S_chargers)
+                A_chargers = int(A_chargers)
+                B_chargers = int(B_chargers)
+                regions.append(Region(region_id, latitude, longitude, int(avg_pop * driving_perc), avg_m_inc, S_chargers, A_chargers, B_chargers))
+
+    def read_car_csv(self, filename, cars):
+        with open(filename, "r") as csvfile:
+            reader = csv.reader(csvfile, delimiter=";")
+            next(reader)  # Skip the header
+            for row in reader:
+                car_id, autonomy, price = row
+                autonomy = int(autonomy)
+                price = int(price)
+                cars.append(Car(car_id, autonomy, price))
+
     def read_drone_csv(self, filename):
         drones = []
         with open(filename, "r") as csvfile:
@@ -52,18 +63,25 @@ class Application:
                     capacity), extract_numeric_value(autonomy), extract_numeric_value(velocity), initialPos))
         return drones
 
+        
+
     def main(self):
         center_files = ["data/delivery_center1.csv",
                         "data/delivery_center2.csv"]
         drone_file = "data/delivery_drones.csv"
         regions = []
         region_file = "data/regions.csv"
+        carModels = []
+        car_file = "data/cars.csv"
         agents = []
         centers = []
         if os.path.exists(region_file):
-            res = self.read_region_csv(region_file)
-            regions.extend(res)
-    
+            self.read_region_csv(region_file, regions)
+        if os.path.exists(car_file):
+            self.read_car_csv(car_file, carModels)
+
+        cars = CarSeeder(carModels, regions).run()
+
         if os.path.exists(drone_file):
             drones = self.read_drone_csv(drone_file)
             for drone in drones:
