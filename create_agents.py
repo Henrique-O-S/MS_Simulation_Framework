@@ -9,8 +9,9 @@ from spade.agent import Agent
 from agents.center import CenterAgent
 from agents.drone import DroneAgent
 from agents.world import WorldAgent
+from agents.car import CarAgent
 from models.region import Region
-from models.car import Car
+from models.car import CarModel
 from aux_funcs import extract_numeric_value
 from car_seeder import CarSeeder
 
@@ -31,16 +32,14 @@ class Application:
             reader = csv.reader(csvfile, delimiter=";")
             next(reader)  # Skip the header
             for row in reader:
-                region_id, latitude, longitude, avg_pop, driving_perc, avg_m_inc, S_chargers, A_chargers, B_chargers = row
+                region_id, latitude, longitude, avg_pop, driving_perc, avg_m_inc, chargers = row
                 latitude = float(latitude.replace(",", "."))
                 longitude = float(longitude.replace(",", "."))
                 avg_pop = int(avg_pop)
                 driving_perc = float(driving_perc.replace(",", "."))
                 avg_m_inc = float(avg_m_inc.replace(",", "."))
-                S_chargers = int(S_chargers)
-                A_chargers = int(A_chargers)
-                B_chargers = int(B_chargers)
-                regions.append(Region(region_id, latitude, longitude, int(avg_pop * driving_perc), avg_m_inc, S_chargers, A_chargers, B_chargers))
+                chargers = int(chargers)
+                regions.append(Region(region_id, latitude, longitude, int(avg_pop * driving_perc), avg_m_inc, chargers))
 
     def read_car_csv(self, filename, cars):
         with open(filename, "r") as csvfile:
@@ -50,7 +49,7 @@ class Application:
                 car_id, autonomy, price = row
                 autonomy = int(autonomy)
                 price = int(price)
-                cars.append(Car(car_id, autonomy, price))
+                cars.append(CarModel(car_id, autonomy, price))
 
     def read_drone_csv(self, filename):
         drones = []
@@ -80,31 +79,22 @@ class Application:
         if os.path.exists(car_file):
             self.read_car_csv(car_file, carModels)
 
-        cars = CarSeeder(carModels, regions).run()
+        carsData = CarSeeder(carModels, regions).run()
 
-        if os.path.exists(drone_file):
-            drones = self.read_drone_csv(drone_file)
-            for drone in drones:
-                drone.centers = map(lambda x: x.jid, centers)
-                for center in centers:
-                    if(drone.initialPos == center.center_id):
-                        drone.latitude = center.latitude
-                        drone.longitude = center.longitude
-            for agent in agents:
-                agent.drones = map(lambda x: x.jid, drones)
-            agents.extend(drones)
-        #else:
-            #print(f"File {filename} not found.")
-
-        # Pass drones jid to centers and vice versa
-        for agent in agents:
-            if isinstance(agent, DroneAgent):
-                agent.centers = [center.jid for center in centers]
+        for region in regions:
+            for carModel in carsData[region.id]:
+                count = 1
+                for _ in range(carsData[region.id][carModel]):
+                    jid = f"{carModel.id}_{region.id}_{count}@localhost"
+                    agents.append(CarAgent(
+                        jid, "1234", carModel.autonomy, 50, (region.latitude, region.longitude)))
+                    #print(jid)
+                    count += 1
         
 
-        self.world_agent = WorldAgent(
+        """ self.world_agent = WorldAgent(
             "world@localhost", "1234", centers, drones, [], self.app, self.socketio)
-        agents.append(self.world_agent)
+        agents.append(self.world_agent) """
 
         async def run_agents():
             for agent in agents:

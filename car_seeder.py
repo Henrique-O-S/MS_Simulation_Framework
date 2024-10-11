@@ -18,13 +18,13 @@ class CarSeeder:
         affordable = []
         for car in self.cars:
             if car.price <= income * self.percWillingToSpend:
-                affordable.append(car.id)
+                affordable.append(car)
         return affordable
 
     def simulate_region(self, region):
         avg_income = region.avg_income
         
-        results = {car.id: 0 for car in self.cars}
+        results = {car: 0 for car in self.cars}
         
         for _ in range(region.avg_drivers):
             income = self.generate_income(avg_income)
@@ -41,8 +41,10 @@ class CarSeeder:
         for region in self.regions:
             region_result = self.simulate_region(region)
             all_results[region.id] = region_result
-            print(region.id, region_result)
-        self.plot_car_distribution(all_results)
+            print(region.id)
+            for car in region_result:
+                print(f"{car.id}: {region_result[car]}")
+        #self.plot_car_distribution(all_results)
         return all_results
 
     def plot_car_distribution(self, all_results):

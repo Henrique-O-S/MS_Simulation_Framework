@@ -1,8 +1,8 @@
-id; lat; long; avg_population; driving_percentage; avg_monthly_income; S_chargers; A_chargers; B_chargers
-Aldoar; -8.685; 41.164; 30000; 0.8; 2800; 2; 3; 4
-Ramalde; -8.644; 41.169; 39000; 0.8; 1500; 1; 2; 3
-Lordelo; -8.229; 41.319; 28000; 0.8; 1800; 1; 2; 3
-Paranhos; -8.597; 41.176; 46000; 0.8; 1500; 1; 2; 3
-Centro; -8.618; 41.154; 38000; 0.8; 1500; 1; 2; 3
-Bonfim; -8.595; 41.153; 23000; 0.8; 1400; 1; 2; 3
-Campanha; -8.572; 41.158; 30000; 0.8; 1100; 1; 2; 3
+id; lat; long; avg_population; driving_percentage; avg_monthly_income; chargers
+Aldoar; -8.685; 41.164; 30000; 0.8; 2800; 2
+Ramalde; -8.644; 41.169; 39000; 0.8; 1500; 1
+Lordelo; -8.229; 41.319; 28000; 0.8; 1800; 1
+Paranhos; -8.597; 41.176; 46000; 0.8; 1500; 1
+Centro; -8.618; 41.154; 38000; 0.8; 1500; 1
+Bonfim; -8.595; 41.153; 23000; 0.8; 1400; 1
+Campanha; -8.572; 41.158; 30000; 0.8; 1100; 1

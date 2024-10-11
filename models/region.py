@@ -1,13 +1,11 @@
 class Region:
-    def __init__(self, id, latitude, longitude, avg_drivers, avg_income, S_chargers, A_chargers, B_chargers):
+    def __init__(self, id, latitude, longitude, avg_drivers, avg_income, chargers):
         self.id = id
         self.latitude = float(latitude)
         self.longitude = float(longitude)
         self.avg_drivers = int(avg_drivers)
         self.avg_income = int(avg_income)
-        self.S_chargers = int(S_chargers)
-        self.A_chargers = int(A_chargers)
-        self.B_chargers = int(B_chargers)
+        self.chargers = int(chargers)
 
     def get_id(self):
         return self.id

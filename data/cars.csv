@@ -1,7 +1,7 @@
 id;autonomy; price
-low-end-1;200; 400
-low-end-2;300; 500
-mid-end-1; 350; 700
-mid-end-2; 400; 900
-high-end-1; 450; 1000 
-high-end-2; 500; 1200
+low_end;200; 400
+low_mid_end;300; 500
+mid_end; 350; 700
+mid_high_end; 400; 900
+high_end; 450; 1000 
+top_end; 500; 1200
