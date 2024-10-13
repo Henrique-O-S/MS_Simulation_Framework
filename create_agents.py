@@ -7,6 +7,7 @@ from flask_socketio import SocketIO
 from flask_cors import CORS
 from spade.agent import Agent
 from agents.center import CenterAgent
+from agents.region import RegionAgent
 from agents.drone import DroneAgent
 from agents.world import WorldAgent
 from agents.car import CarAgent
@@ -80,9 +81,17 @@ class Application:
             self.read_car_csv(car_file, carModels)
 
         carsData = CarSeeder(carModels, regions).run()
+        region_jids = {}
+        for region in regions:
+            jid = f"{region.id}@localhost"
+            region_jids[region.id] = jid
+            agents.append(RegionAgent(
+                jid, "1234", region.latitude, region.longitude, region.chargers))
 
 
-        #THIS IS NORMAL SIMULATION
+        #CHOOSE ONE OF THE COMMENTS BELOW
+
+            #THIS IS NORMAL SIMULATION
         """ for region in regions:
             for carModel in carsData[region.id]:
                 count = 1
@@ -93,9 +102,9 @@ class Application:
                     #print(jid)
                     count += 1 """
 
-        #THIS IS FOR TESTING (LEAVE EITHER THIS OR THE FOR ABOVE)
+            #THIS IS FOR TESTING
         agents.append(CarAgent(
-            "low_end_Ramalde_1@localhost", "1234", 100, 50, regions[0], regions))
+            "low_end_Ramalde_1@localhost", "1234", 100, 50, regions[0], regions, region_jids))
         
 
         """ self.world_agent = WorldAgent(
