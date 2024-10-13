@@ -61,8 +61,8 @@ class Application:
                 drones.append(DroneAgent(drone_id + "@localhost", "1234", extract_numeric_value(
                     capacity), extract_numeric_value(autonomy), extract_numeric_value(velocity), initialPos))
         return drones
-
         
+
 
     def main(self):
         center_files = ["data/delivery_center1.csv",
@@ -81,15 +81,21 @@ class Application:
 
         carsData = CarSeeder(carModels, regions).run()
 
-        for region in regions:
+
+        #THIS IS NORMAL SIMULATION
+        """ for region in regions:
             for carModel in carsData[region.id]:
                 count = 1
                 for _ in range(carsData[region.id][carModel]):
                     jid = f"{carModel.id}_{region.id}_{count}@localhost"
                     agents.append(CarAgent(
-                        jid, "1234", carModel.autonomy, 50, (region.latitude, region.longitude)))
+                        jid, "1234", carModel.autonomy, 50, region, regions))
                     #print(jid)
-                    count += 1
+                    count += 1 """
+
+        #THIS IS FOR TESTING (LEAVE EITHER THIS OR THE FOR ABOVE)
+        agents.append(CarAgent(
+            "low_end_Ramalde_1@localhost", "1234", 100, 50, regions[0], regions))
         
 
         """ self.world_agent = WorldAgent(

@@ -18,3 +18,6 @@ class Region:
     
     def __str__(self):
         return f"{self.id}, Latitude: {self.latitude}, Longitude: {self.longitude}"
+
+    def __eq__(self, other):
+        return self.latitude == other.latitude and self.longitude == other.longitude
