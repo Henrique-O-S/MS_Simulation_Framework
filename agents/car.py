@@ -20,12 +20,13 @@ TRAVELING = "[Traveling]"
 IDLE = "[Idle]"
 CHARGING = "[Charging]"
 
+
 class CarAgent(agent.Agent):
     def __init__(self, jid, password, autonomy, velocity, currentRegion, regions):
         super().__init__(jid, password)
         self.autonomy = autonomy
         self.full_autonomy = autonomy
-        self.velocity = velocity * 0.00001666666 * 200# in km/tick
+        self.velocity = velocity * 0.00001666666 * 200  # in km/tick
         self.currentRegion = currentRegion
         self.latitude = currentRegion.latitude
         self.longitude = currentRegion.longitude
@@ -34,15 +35,15 @@ class CarAgent(agent.Agent):
         self.regions = regions
         self.nextRegion = None
         self.chargeAtDestination = False
+        self.stuckAtRegion = False
 
     async def setup(self):
-        #print(f"Car agent {self.jid} started")
+        # print(f"Car agent {self.jid} started")
 
         fsm = self.CarFSMBehaviour()
         fsm.add_state(name=IDLE, state=self.Idle(), initial=True)
         fsm.add_state(name=TRAVELING, state=self.Traveling())
         fsm.add_state(name=CHARGING, state=self.Charging())
-
 
         fsm.add_transition(IDLE, TRAVELING)
         fsm.add_transition(TRAVELING, CHARGING)
@@ -56,6 +57,9 @@ class CarAgent(agent.Agent):
         template = spade.template.Template()
         template.body = "stop"
         self.add_behaviour(stop_behaviour, template)
+
+    def get_battery_percentage(self):
+        return self.autonomy / self.full_autonomy
 
     def extract_numeric_value(self, value_str):
         """
@@ -80,31 +84,51 @@ class CarAgent(agent.Agent):
             cos(angle) / (111.2 * cos(lat1))
 
         return new_latitude, new_longitude
-    
+
     def pick_next_region(self):
-        valid_regions = [region for region in self.regions if haversine_distance(self.latitude, self.longitude, region.latitude, region.longitude) < self.autonomy and region != self.currentRegion]
+        valid_regions = [region for region in self.regions if haversine_distance(
+            self.latitude, self.longitude, region.latitude, region.longitude) < self.autonomy and region != self.currentRegion]
         if not valid_regions:
-            raise Exception("No reachable region within autonomy")
-        self.nextRegion = random.choice(valid_regions)        
+            return 0
+        self.nextRegion = random.choice(valid_regions)
+        return 1
+
+    def arrived_at_destination(self):
+        self.currentRegion = self.agent.nextRegion
+        self.nextRegion = None
 
     class CarFSMBehaviour(FSMBehaviour):
         async def on_start(self):
-            #print(f"Drone FSM starting at initial state {self.current_state}")
+            # print(f"Drone FSM starting at initial state {self.current_state}")
             pass
 
         async def on_end(self):
-            #print(f"Drone FSM finished at state {self.current_state}")
+            # print(f"Drone FSM finished at state {self.current_state}")
             await self.agent.stop()
-
 
     class Idle(State):
         async def run(self):
-            print(f"Car agent travelling:")
+            # print(f"Car agent {self.agent.jid} is idle.")
 
-            if random.random() < 1:
-                self.agent.pick_next_region()
-                self.set_next_state(TRAVELING)
-    
+            # If battery is bellow 30, 70 percent chance of charging
+            if self.agent.get_battery_percentage() < 0.3 and random.random() < 0.7:
+                self.set_next_state(CHARGING)
+
+            elif random.random() < 0.3:  # 30% chance of staying idle
+                print(f"Decided to stay idle for now.")
+                await asyncio.sleep(10)  # Stay idle for 10 seconds
+                print("Waking up from idle.")
+                self.set_next_state(IDLE)
+
+            else:  # Travel if not idling or charging
+                print(f"Deciding to travel.")
+                if self.agent.pick_next_region():
+                    self.set_next_state(TRAVELING)
+                else:
+                    print("No valid region to travel to. Staying idle.")
+                    self.stuckAtRegion = True
+                    self.set_next_state(CHARGING)
+
     class Traveling(State):
         async def run(self):
 
@@ -138,25 +162,24 @@ class CarAgent(agent.Agent):
                 # Wait for a tick
                 await asyncio.sleep(1 / 60)
             self.set_next_state(CHARGING)
+            self.agent.arrived_at_destination()
             print("Arrived at destination")
-            #self.agent.autonomy = self.agent.full_autonomy
-            #self.agent.orders.extend(self.agent.future_orders)
-            #if self.agent.orders:
+            # self.agent.autonomy = self.agent.full_autonomy
+            # self.agent.orders.extend(self.agent.future_orders)
+            # if self.agent.orders:
             #    self.agent.weights.append(sum([order[3] for order in self.agent.orders]) / self.agent.capacity)
-            #self.agent.future_orders = []
-            #self.set_next_state(DELIVERING_ORDERS)
-    
+            # self.agent.future_orders = []
+            # self.set_next_state(DELIVERING_ORDERS)
+
     class Charging(State):
         async def run(self):
-            self.agent.currentRegion = self.agent.nextRegion
-            self.agent.nextRegion = None
-            print(f"Car agent charging:")
             
+            print(f"Car agent charging:")
 
     class StopBehaviour(spade.behaviour.CyclicBehaviour):
         async def run(self):
             msg = await self.receive(timeout=10)
             if msg:
                 if msg.body == "stop":
-                    #print(f"Received stop message. Stopping drone {self.agent.jid} ...")
+                    # print(f"Received stop message. Stopping drone {self.agent.jid} ...")
                     await self.agent.stop()
