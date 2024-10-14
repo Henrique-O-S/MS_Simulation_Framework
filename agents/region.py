@@ -59,6 +59,10 @@ class RegionAgent(spade.agent.Agent):
                         response = Message(to=str(next_car))
                         response.body = "[ChargingStarted]"
                         await self.send(response)
+                elif msg.body == "[AskAvailableChargers]":
+                    response = Message(to=str(msg.sender))
+                    response.body = f"{self.agent.available_chargers}"
+                    await self.send(response)
             else:
                 # print("Did not receive any message after 10 seconds")
                 pass

@@ -20,6 +20,7 @@ TRAVELING = "[Traveling]"
 IDLE = "[Idle]"
 CHARGING = "[Charging]"
 BEFORE_CHARGING = "[BeforeCharging]"
+DECIDE_CHARGING = "[DecideCharging]"
 
 
 class CarAgent(agent.Agent):
@@ -44,16 +45,24 @@ class CarAgent(agent.Agent):
 
         fsm = self.CarFSMBehaviour()
         fsm.add_state(name=IDLE, state=self.Idle(), initial=True)
+        fsm.add_state(name=DECIDE_CHARGING, state=self.DecideCharging())
         fsm.add_state(name=BEFORE_CHARGING, state=self.BeforeCharging())
         fsm.add_state(name=TRAVELING, state=self.Traveling())
         fsm.add_state(name=CHARGING, state=self.Charging())
 
+        fsm.add_transition(IDLE, DECIDE_CHARGING)
         fsm.add_transition(IDLE, TRAVELING)
-        fsm.add_transition(IDLE, BEFORE_CHARGING)
-        fsm.add_transition(TRAVELING, IDLE)
-        fsm.add_transition(BEFORE_CHARGING, CHARGING)
-        fsm.add_transition(CHARGING, IDLE)
         fsm.add_transition(IDLE, IDLE)
+
+        fsm.add_transition(DECIDE_CHARGING, BEFORE_CHARGING)
+        fsm.add_transition(DECIDE_CHARGING, TRAVELING)
+
+        fsm.add_transition(TRAVELING, IDLE)
+        fsm.add_transition(TRAVELING, BEFORE_CHARGING)
+
+        fsm.add_transition(BEFORE_CHARGING, CHARGING)
+
+        fsm.add_transition(CHARGING, IDLE)
 
         self.add_behaviour(fsm)
 
@@ -92,11 +101,14 @@ class CarAgent(agent.Agent):
 
         return new_latitude, new_longitude
 
+    def reachable_regions(self):
+        return [region for region in self.regions if haversine_distance(
+            self.latitude, self.longitude, region.latitude, region.longitude) < self.autonomy]
+
     def pick_next_region(self):
-        valid_regions = [region for region in self.regions if haversine_distance(
-            self.latitude, self.longitude, region.latitude, region.longitude) < self.autonomy and region != self.currentRegion]
-        if not valid_regions:
-            return 0
+        valid_regions = [region for region in self.reachable_regions() if region != self.currentRegion]
+        if len(valid_regions) == 0:
+            return None
         return random.choice(valid_regions)
 
     def arrived_at_destination(self):
@@ -119,12 +131,11 @@ class CarAgent(agent.Agent):
             # If battery is bellow 30, 70 percent chance of charging
             if self.agent.get_battery_percentage() < 0.3 and random.random() < 0.7:
                 print(f"Decided to charge.")
-                self.agent.stuckAtRegion = self.agent.pick_next_region() == 0
-                self.set_next_state(BEFORE_CHARGING)
+                self.set_next_state(DECIDE_CHARGING)
 
             elif random.random() < 0.3:  # 30% chance of staying idle
                 print(f"Decided to stay idle for now.")
-                await asyncio.sleep(6)  # Stay idle for 6 seconds
+                # await asyncio.sleep(6)  # Stay idle for 6 seconds
                 print("Waking up from idle.")
                 self.set_next_state(IDLE)
 
@@ -173,17 +184,56 @@ class CarAgent(agent.Agent):
                 await asyncio.sleep(1 / 60)
             self.agent.arrived_at_destination()
             print("Arrived at destination")
-            self.set_next_state(IDLE)
+            if self.agent.chargeAtDestination:
+                self.agent.chargeAtDestination = False
+                self.set_next_state(BEFORE_CHARGING)
+            else:
+                self.set_next_state(IDLE)
 
+    class DecideCharging(State):
+        async def run(self):
+            expectedResponses = 0
+            reachable_regions = self.agent.reachable_regions()
+            for region_jid in self.agent.region_jids.values():
+                if region_jid not in map(lambda x: x.id + "@localhost", reachable_regions):
+                    print("Region not reachable ", region_jid)
+                    continue
+                expectedResponses += 1
+                message = Message(to=region_jid)
+                print("asking for available chargers in ", region_jid)
+                message.body = "[AskAvailableChargers]"
+                await self.send(message)
+
+            # Wait for the responses
+            responses = []
+            for _ in range(expectedResponses):
+                msg = await self.receive(timeout=3)
+                if msg:
+                    responses.append((msg.sender, int(msg.body)))
+
+            responses.sort(key=lambda x: x[1], reverse=True)
+
+            chargingRegionID = responses[0][0].localpart
+
+            print(f"Charging region picked: {chargingRegionID}")
+
+            if self.agent.currentRegion.id == chargingRegionID:
+                print("Already at charging region")
+                self.set_next_state(BEFORE_CHARGING)
+
+            else:
+                for region in self.agent.regions:
+                    if region.id == chargingRegionID:
+                        print(f"Charging region found: {region}")
+                        self.agent.chargeAtDestination = True
+                        self.agent.nextRegion = region
+                        self.set_next_state(TRAVELING)
 
     class BeforeCharging(State):
         async def run(self):
-            if self.agent.stuckAtRegion or True:
-                print(self.agent.region_jids)
-                print(self.agent.region_jids[self.agent.currentRegion.id])
-                message = Message(to=self.agent.region_jids[self.agent.currentRegion.id])
-                message.body = "[JoinQueue]"
-                await self.send(message)
+            message = Message(to=self.agent.currentRegion.id + "@localhost")
+            message.body = "[JoinQueue]"
+            await self.send(message)
             msg = None
             while not msg:
                 msg = await self.receive(timeout=10)
@@ -196,10 +246,10 @@ class CarAgent(agent.Agent):
     class Charging(State):
         async def run(self):
             print(f"{self.agent.jid} has started charging at {self.agent.currentRegion}")
-            # Simulate charging (e.g., wait for a certain time)
             await asyncio.sleep(10)  # Charging time
             self.agent.autonomy = self.agent.full_autonomy  # Reset battery after charging
-            message = Message(to=self.agent.region_jids[self.agent.currentRegion.id])
+            message = Message(
+                to=self.agent.region_jids[self.agent.currentRegion.id])
             message.body = "[StopCharging]"
             await self.send(message)
             print(f"{self.agent.jid} has finished charging. Battery full.")
