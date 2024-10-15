@@ -18,7 +18,7 @@ class RegionAgent(spade.agent.Agent):
         print(f"Region agent {self.jid} started.")
 
         # Add behavior to handle incoming requests
-        b = self.AwaitCars()
+        b = self.ManageCars()
         template = spade.template.Template()
         self.add_behaviour(b, template)
     
@@ -29,7 +29,7 @@ class RegionAgent(spade.agent.Agent):
     def start_charging(self):
         self.available_chargers -= 1
 
-    class AwaitCars(CyclicBehaviour):
+    class ManageCars(CyclicBehaviour):
         async def run(self):
             #print("a")
             msg = await self.receive(timeout=2)
