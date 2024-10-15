@@ -53,6 +53,7 @@ class CarAgent(agent.Agent):
         fsm.add_transition(IDLE, DECIDE_CHARGING)
         fsm.add_transition(IDLE, TRAVELING)
         fsm.add_transition(IDLE, IDLE)
+        fsm.add_transition(IDLE, BEFORE_CHARGING)
 
         fsm.add_transition(DECIDE_CHARGING, BEFORE_CHARGING)
         fsm.add_transition(DECIDE_CHARGING, TRAVELING)
@@ -115,6 +116,42 @@ class CarAgent(agent.Agent):
         self.currentRegion = self.nextRegion
         self.nextRegion = None
 
+    def choose_charging_region(self, responses):
+        def score(response):
+            region_jid, data = response
+            num_chargers, queue_size = data
+            region_id = str(region_jid.localpart)
+            region = None
+            print("a", region_id)
+            for region_el in self.regions:
+                if region_el.id == region_id:
+                    region = region_el
+
+            # Calculate the distance to the region
+            distance = haversine_distance(self.currentRegion.latitude, self.currentRegion.longitude, region.latitude, region.longitude)
+
+            # Calculate the score
+            # Assign a higher weight to the inverse of the distance to prioritize closer regions
+            # Assign a lower weight to the number of available chargers
+            # Use the queue size to break ties
+            distance_weight = 0.7
+            chargers_weight = 0.3
+            queue_weight = 0.01  # to remove possible ties
+
+            print("distance", distance)
+            print("chargers", num_chargers)
+
+            distance += 0.1 # to avoid div by 0 when in the same region
+
+            return distance_weight * (1 / distance) + chargers_weight * num_chargers - queue_weight * queue_size
+
+        # Calculate the score for each region and sort the responses
+        responses.sort(key=score, reverse=True)
+
+        # Return the region with the highest score
+        return str(responses[0][0].localpart)
+    
+
     class CarFSMBehaviour(FSMBehaviour):
         async def on_start(self):
             # print(f"Drone FSM starting at initial state {self.current_state}")
@@ -126,6 +163,7 @@ class CarAgent(agent.Agent):
 
     class Idle(State):
         async def run(self):
+            await asyncio.sleep(1)
             # print(f"Car agent {self.agent.jid} is idle.")
             print(f"Current battery: {self.agent.get_battery_percentage()}")
             # If battery is bellow 30, 70 percent chance of charging
@@ -135,7 +173,7 @@ class CarAgent(agent.Agent):
 
             elif random.random() < 0.3:  # 30% chance of staying idle
                 print(f"Decided to stay idle for now.")
-                # await asyncio.sleep(6)  # Stay idle for 6 seconds
+                await asyncio.sleep(4)  # Stay idle for 4 seconds
                 print("Waking up from idle.")
                 self.set_next_state(IDLE)
 
@@ -146,7 +184,7 @@ class CarAgent(agent.Agent):
                     self.agent.nextRegion = next_region
                     self.set_next_state(TRAVELING)
                 else:
-                    print("No valid region to travel to. Staying idle.")
+                    print("No valid region to travel to. Im stuck in region. Going to recharge")
                     self.agent.stuckAtRegion = True
                     self.set_next_state(BEFORE_CHARGING)
 
@@ -209,11 +247,12 @@ class CarAgent(agent.Agent):
             for _ in range(expectedResponses):
                 msg = await self.receive(timeout=3)
                 if msg:
-                    responses.append((msg.sender, int(msg.body)))
+                    if len(msg.body.split("-")) == 2:
+                        numChargers, queueSize = msg.body.split("-")
+                        print(numChargers, queueSize)
+                        responses.append((msg.sender, (int(numChargers), int(queueSize))))
 
-            responses.sort(key=lambda x: x[1], reverse=True)
-
-            chargingRegionID = responses[0][0].localpart
+            chargingRegionID = self.agent.choose_charging_region(responses)
 
             print(f"Charging region picked: {chargingRegionID}")
 
