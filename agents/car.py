@@ -9,6 +9,7 @@ from spade.template import Template
 from aux_funcs import evaluate_proposals, haversine_distance, calculate_angle, sort_orders_by_shortest_path
 import json
 from math import sin, cos, radians
+import aioxmpp
 
 ASK_ORDERS = "[AskOrders]"
 AWAIT_ORDERS = "[AwaitOrders]"
@@ -39,6 +40,7 @@ class CarAgent(agent.Agent):
         self.chargeAtDestination = False
         self.stuckAtRegion = False
         self.region_jids = region_jids
+        self.car_name = aioxmpp.JID.fromstr(jid).localpart
 
     async def setup(self):
         # print(f"Car agent {self.jid} started")

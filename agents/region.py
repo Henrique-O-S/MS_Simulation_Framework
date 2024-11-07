@@ -2,6 +2,7 @@ import spade
 from spade.behaviour import CyclicBehaviour
 from spade.message import Message
 from models.region import Region
+import aioxmpp
 import queue
 
 class RegionAgent(spade.agent.Agent):
@@ -13,6 +14,7 @@ class RegionAgent(spade.agent.Agent):
         self.available_chargers = self.chargers
         self.cars_charged = 0
         self.queue = queue.Queue()
+        self.region_name = aioxmpp.JID.fromstr(jid).localpart
 
     async def setup(self):
         print(f"Region agent {self.jid} started.")

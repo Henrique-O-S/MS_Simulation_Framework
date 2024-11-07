@@ -66,15 +66,11 @@ class Application:
 
 
     def main(self):
-        center_files = ["data/delivery_center1.csv",
-                        "data/delivery_center2.csv"]
-        drone_file = "data/delivery_drones.csv"
         regions = []
         region_file = "data/regions.csv"
         carModels = []
         car_file = "data/cars.csv"
         agents = []
-        centers = []
         if os.path.exists(region_file):
             self.read_region_csv(region_file, regions)
         if os.path.exists(car_file):
@@ -87,7 +83,7 @@ class Application:
             region_jids[region.id] = jid
             agents.append(RegionAgent(
                 jid, "1234", region.latitude, region.longitude, region.chargers))
-
+        
 
         #CHOOSE ONE OF THE COMMENTS BELOW
 
@@ -106,10 +102,13 @@ class Application:
         agents.append(CarAgent(
             "low_end_Ramalde_1@localhost", "1234", 100, 50, regions[0], regions, region_jids))
         
+        carAgents = [agent for agent in agents if isinstance(agent, CarAgent)]
 
-        """ self.world_agent = WorldAgent(
-            "world@localhost", "1234", centers, drones, [], self.app, self.socketio)
-        agents.append(self.world_agent) """
+        regionAgents = [agent for agent in agents if isinstance(agent, RegionAgent)]
+
+        self.world_agent = WorldAgent(
+            "world@localhost", "1234", regionAgents, carAgents, self.app, self.socketio)
+        agents.append(self.world_agent)
 
         async def run_agents():
             for agent in agents:

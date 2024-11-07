@@ -18,11 +18,10 @@ class UpdatePointsBehaviour(CyclicBehaviour):
 
 
 class WorldAgent(Agent):
-    def __init__(self, jid, password, centers, drones, restrictions, app, socketio):
+    def __init__(self, jid, password, regions, cars, app, socketio):
         super().__init__(jid, password)
-        self.centers = centers
-        self.drones = drones
-        self.restrictions = restrictions
+        self.regions = regions
+        self.cars = cars
         self.app = app
         self.socketio = socketio
 
@@ -31,16 +30,13 @@ class WorldAgent(Agent):
         self.add_behaviour(UpdatePointsBehaviour(self))
 
     def update_visualization(self):
-        centers_data = [{'name': center.name, 'lat': center.latitude,
-                        'lng': center.longitude, 'num_orders': len(center.orders)} for center in self.centers]
-        orders_data = [{'name': order.id, 'lat': order.latitude, 'lng': order.longitude}
-                       for center in self.centers for order in center.orders]
-        drones_data = [{'name': "drone_" + str(drone.number), 'lat': drone.latitude, 'lng': drone.longitude,
-                        'orders': [order[0] for order in drone.orders]} for drone in self.drones]
+        regions_data = [{'name': region.region_name, 'lat': region.latitude,
+                        'lng': region.longitude, 'cars_charged': "gato"} for region in self.regions]
+        cars_data = [{'name': car.car_name, 'lat': car.latitude, 'lng': car.longitude} for car in self.cars]
         self.socketio.emit(
-            'map_updated', {'center_data': centers_data, 'order_data': orders_data, 'drone_data': drones_data})
+            'map_updated', {'region_data': regions_data, 'car_data': cars_data})
         # Check if all orders are delivered
-        if all(len(center.orders) == 0 for center in self.centers) and all(len(drone.orders) == 0 for drone in self.drones):
+        """ if all(len(center.orders) == 0 for center in self.centers) and all(len(drone.orders) == 0 for drone in self.drones):
             distance = 0
             times = {}
             occupation = {}
@@ -61,7 +57,7 @@ class WorldAgent(Agent):
             print("Drone times in hours: ", times)
             print("Drone occupation ratios in %: ", occupation)
             self.signal_end()
-            self.stop()
+            self.stop() """
     def signal_end(self):
         self.socketio.emit('simulation_end', {})
         print("Simulation ended.")
