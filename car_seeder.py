@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 class CarSeeder:
-    def __init__(self, cars, regions, salary_fluctuation = 0.2, percentage_willing_to_spend = 0.2, probability_of_buying=0.4):
+    def __init__(self, cars, regions, salary_fluctuation = 0.325, percentage_willing_to_spend = 0.2, probability_of_buying=0.4):
         self.cars = cars
         self.regions = regions
         self.salaryFluctuation = salary_fluctuation
@@ -12,7 +12,10 @@ class CarSeeder:
         self.probabilityOfBuying = probability_of_buying
 
     def generate_income(self, avg_income):
-        return np.random.normal(avg_income, avg_income * self.salaryFluctuation) # normal distribution with some margins
+        sigma = np.sqrt(np.log(1 + (self.salaryFluctuation ** 2)))
+        mu = np.log(avg_income) - (sigma**2 / 2)
+        
+        return np.random.lognormal(mu, sigma)
 
     def affordable_cars(self, income):
         affordable = []
