@@ -91,19 +91,18 @@ class Application:
         #CHOOSE ONE OF THE COMMENTS BELOW
 
             #THIS IS NORMAL SIMULATION
-        """ for region in regions:
+        for region in regions:
+            count = 1
             for carModel in carsData[region.id]:
-                count = 1
                 for _ in range(carsData[region.id][carModel]):
                     jid = f"{carModel.id}_{region.id}_{count}@localhost"
                     agents.append(CarAgent(
-                        jid, "1234", carModel.autonomy, 50, region, regions))
-                    #print(jid)
-                    count += 1 """
+                        jid, "1234", carModel.autonomy, 50, region, regions, region_jids))
+                    count += 1
 
             #THIS IS FOR TESTING
         agents.append(CarAgent(
-            "low_end_Ramalde_1@localhost", "1234", 100, 50, regions[0], regions, region_jids))
+            "low_end_ramalde_1@localhost", "1234", 100, 50, regions[0], regions, region_jids))
         
         carAgents = [agent for agent in agents if isinstance(agent, CarAgent)]
         regionAgents = [agent for agent in agents if isinstance(agent, RegionAgent)]

@@ -16,7 +16,7 @@
         var droneIcon = new L.Icon({
             iconUrl: 'static/car2.png',
             shadowUrl: null,
-            iconSize: [45, 38],
+            iconSize: [45, 30],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
@@ -31,17 +31,17 @@
             shadowSize: [41, 41]
         });
 
-        var mapIcon = new L.Icon({
+        /* var mapIcon = new L.Icon({
             iconUrl: 'static/mapa.png',
             shadowUrl: null,
             iconSize: [700, 300],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
-        });
+        }); */
 
         // Initialize the map
-        var map = L.map('map').setView([41.17, -8.5], 13);
+        var map = L.map('map').setView([41.16, -8.63], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 20,
         }).addTo(map);
@@ -55,7 +55,7 @@
 
         // Listen for the 'map_updated' event
         socket.on('map_updated', function (data) {
-            var marker_map = L.marker([41.17, -8.6], { icon: mapIcon }).addTo(map);
+            //var marker_map = L.marker([41.17, -8.6], { icon: mapIcon }).addTo(map);
             // Update each set of coordinates
             data.region_data.forEach(function (region) {
                 // If a marker for this name already exists and its position has changed, update its position
