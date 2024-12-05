@@ -15,6 +15,7 @@ from models.region import Region
 from models.car import CarModel
 from aux_funcs import extract_numeric_value
 from car_seeder import CarSeeder
+import time
 
 
 class Application:
@@ -88,8 +89,6 @@ class Application:
             region_jids[region.id] = jid
             agents.append(RegionAgent(
                 jid, "1234", region.latitude, region.longitude, region.chargers))
-            regionAgents.append(RegionAgent(
-                jid, "1234", region.latitude, region.longitude, region.chargers))
         #CHOOSE ONE OF THE COMMENTS BELOW
 
             #THIS IS NORMAL SIMULATION
@@ -100,13 +99,10 @@ class Application:
                     jid = f"{carModel.id}_{region.id}_{count}@localhost"
                     agents.append(CarAgent(
                         jid, "1234", carModel.autonomy, 50, region, regions, region_jids))
-                    carAgents.append(CarAgent(
-                        jid, "1234", carModel.autonomy, 50, region, regions, region_jids))
-                    count += 1
 
             #THIS IS FOR TESTING
-        agents.append(CarAgent(
-            "low_end_ramalde_1@localhost", "1234", 100, 50, regions[0], regions, region_jids))
+        '''agents.append(CarAgent(
+            "low_end_ramalde_1@localhost", "1234", 100, 50, regions[0], regions, region_jids))'''
         
         carAgents = [agent for agent in agents if isinstance(agent, CarAgent)]
         regionAgents = [agent for agent in agents if isinstance(agent, RegionAgent)]
