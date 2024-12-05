@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 class CarSeeder:
-    def __init__(self, cars, regions, salary_fluctuation = 0.325, percentage_willing_to_spend = 0.2, probability_of_buying=0.4):
+    def __init__(self, cars, regions, salary_fluctuation = 0.325, percentage_willing_to_spend = 0.15, probability_of_buying=0.3):
         self.cars = cars
         self.regions = regions
         self.salaryFluctuation = salary_fluctuation

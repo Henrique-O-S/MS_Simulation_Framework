@@ -80,14 +80,16 @@ class Application:
             self.read_car_csv(car_file, carModels)
 
         carsData = CarSeeder(carModels, regions).run()
+        carAgents = []
+        regionAgents = []
         region_jids = {}
         for region in regions:
             jid = f"{region.id}@localhost"
             region_jids[region.id] = jid
             agents.append(RegionAgent(
                 jid, "1234", region.latitude, region.longitude, region.chargers))
-
-
+            regionAgents.append(RegionAgent(
+                jid, "1234", region.latitude, region.longitude, region.chargers))
         #CHOOSE ONE OF THE COMMENTS BELOW
 
             #THIS IS NORMAL SIMULATION
@@ -97,6 +99,8 @@ class Application:
                 for _ in range(carsData[region.id][carModel]):
                     jid = f"{carModel.id}_{region.id}_{count}@localhost"
                     agents.append(CarAgent(
+                        jid, "1234", carModel.autonomy, 50, region, regions, region_jids))
+                    carAgents.append(CarAgent(
                         jid, "1234", carModel.autonomy, 50, region, regions, region_jids))
                     count += 1
 
@@ -109,13 +113,13 @@ class Application:
         
 
         self.world_agent = WorldAgent(
-            "world@localhost", "1234", regionAgents, carAgents, [], self.app, self.socketio)
+            "world@localhost", "1234", regionAgents, carAgents, self.app, self.socketio)
         agents.append(self.world_agent)
-
+        print("starting")
         async def run_agents():
             for agent in agents:
                 await agent.start(auto_register=True)
-
+        print("done")
         asyncio.run(run_agents())
 
 
