@@ -33,6 +33,7 @@ class WorldAgent(Agent):
     def update_visualization(self):
         regions_data = [{'name': region.region_name, 'lat': region.latitude,
                         'lng': region.longitude, 'cars_charged': "gato"} for region in self.regions]
+        #cars_data = [{'name': car.car_name, 'lat': car.latitude, 'lng': car.longitude} for car in self.cars]
         cars_data = [{'name': car.car_name, 'lat': car.latitude, 'lng': car.longitude} for car in self.mappedCars]
         self.socketio.emit(
             'map_updated', {'region_data': regions_data, 'car_data': cars_data})
