@@ -13,11 +13,11 @@ class SimulationVisualization:
 
     def update_visualization(self, cars, regions):
         regions_data = [
-            {'name': region.region_name, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged}
+            {'name': region.id, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged}
             for region in regions
         ]
         cars_data = [
-            {'name': car.car_name, 'lat': car.latitude, 'lng': car.longitude}
+            {'name': car.id, 'lat': car.latitude, 'lng': car.longitude}
             for car in cars
         ]
         self.socketio.emit('map_updated', {'region_data': regions_data, 'car_data': cars_data})

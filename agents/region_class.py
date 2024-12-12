@@ -1,7 +1,12 @@
 import queue
 
+TRAVELING = "[Traveling]"
+IDLE = "[Idle]"
+CHARGING = "[Charging]"
+BEFORE_CHARGING = "[BeforeCharging]"
+DECIDE_CHARGING = "[DecideCharging]"
 
-class Region:
+class Region_Class:
     def __init__(self, id, latitude, longitude, chargers):
         self.id = id
         self.latitude = latitude
@@ -17,7 +22,7 @@ class Region:
         if not self.queue.empty():
             next_car = self.queue.get()
             self.start_charging(next_car)
-            next_car.state = next_car.CHARGING # Notifies the next car that it has started charging. Avoids waiting for the next step to start charging.
+            next_car.state = CHARGING # Notifies the next car that it has started charging. Avoids waiting for the next step to start charging.
 
     def start_charging(self, car):
         if self.available_chargers > 0:

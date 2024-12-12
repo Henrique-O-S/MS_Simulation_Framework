@@ -9,7 +9,7 @@ CHARGING = "[Charging]"
 BEFORE_CHARGING = "[BeforeCharging]"
 DECIDE_CHARGING = "[DecideCharging]"
 
-class Car:
+class Car_Class:
     def __init__(self, id, autonomy, velocity, current_region, regions):
         self.id = id
         self.autonomy = autonomy
@@ -37,7 +37,7 @@ class Car:
             self.latitude, self.longitude, region.latitude, region.longitude) < self.autonomy]
 
     def pick_next_region(self):
-        valid_regions = [region for region in self.reachable_regions() if region != self.currentRegion]
+        valid_regions = [region for region in self.reachable_regions() if region != self.current_region]
         if len(valid_regions) == 0:
             return None
         return random.choice(valid_regions)
@@ -52,14 +52,14 @@ class Car:
         self.autonomy = self.full_autonomy
 
     def run(self):
-        print(f"Current battery: {self.agent.get_battery_percentage()}")
+        print(f"Current battery: {self.get_battery_percentage()}")
         if self.state == IDLE:
             if self.get_battery_percentage() < 0.3 and random.random() < 0.7:
                 print(f"Decided to charge.")
                 self.state = DECIDE_CHARGING
             elif random.random() < 0.3:  # 30% chance of staying idle
                 print(f"Decided to stay idle for now.")
-                self.set_next_state(IDLE)
+                self.state = IDLE
             else:  # Travel if not idling or charging
                 print(f"Deciding to travel.")
                 next_region = self.pick_next_region()
@@ -68,7 +68,7 @@ class Car:
                     self.state = TRAVELING
                 else:
                     print("No valid region to travel to. Im stuck in region. Going to recharge")
-                    self.agent.stuckAtRegion = True
+                    self.stuckAtRegion = True
                     self.state = BEFORE_CHARGING
 
         elif self.state == TRAVELING:
@@ -133,19 +133,19 @@ class Car:
                         self.next_region = region
                         self.state = TRAVELING
         elif self.state == BEFORE_CHARGING:
-            if self.agent.stuck_at_region:
+            if self.stuck_at_region:
                 print("Stuck at region. Charging now.")
                 if self.current_region.start_charging(self):
-                        self.agent.charge()
-                        self.agent.stuck_at_region = False
+                        self.charge()
+                        self.stuck_at_region = False
                         self.state = CHARGING
                 else:
                     print("Waiting for charger.")
             else:
                 print("Charging at destination.")
                 if self.current_region.start_charging(self):
-                        self.agent.charge()
-                        self.agent.stuck_at_region = False
+                        self.charge()
+                        self.stuck_at_region = False
                         self.state = CHARGING
                 else:
                     print("Waiting for charger.")
