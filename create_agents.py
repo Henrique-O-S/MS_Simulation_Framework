@@ -6,9 +6,7 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 from flask_cors import CORS
 from spade.agent import Agent
-from agents.center import CenterAgent
 from agents.region import RegionAgent
-from agents.drone import DroneAgent
 from agents.world import WorldAgent
 from agents.car import CarAgent
 from models.region import Region
@@ -51,25 +49,10 @@ class Application:
                 car_id, autonomy, price = row
                 autonomy = int(autonomy)
                 price = int(price)
-                cars.append(CarModel(car_id, autonomy, price))
-
-    def read_drone_csv(self, filename):
-        drones = []
-        with open(filename, "r") as csvfile:
-            reader = csv.reader(csvfile, delimiter=";")
-            next(reader)  # Skip the header
-            for row in reader:
-                drone_id, capacity, autonomy, velocity, initialPos = row
-                drones.append(DroneAgent(drone_id + "@localhost", "1234", extract_numeric_value(
-                    capacity), extract_numeric_value(autonomy), extract_numeric_value(velocity), initialPos))
-        return drones
-        
+                cars.append(CarModel(car_id, autonomy, price))  
 
 
     def main(self):
-        center_files = ["data/delivery_center1.csv",
-                        "data/delivery_center2.csv"]
-        drone_file = "data/delivery_drones.csv"
         regions = []
         region_file = "data/regions.csv"
         carModels = []

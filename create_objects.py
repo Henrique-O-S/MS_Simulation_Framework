@@ -75,6 +75,10 @@ class Application:
                     car = Car_Class(car_model.id, car_model.autonomy, 50, region, region_objects)
                     car_objects.append(car)
 
+        #THIS IS FOR TESTING
+        '''car_objects.append(Car_Class(
+            "low_end_ramalde_1", 100, 50, region_objects[0], region_objects))'''
+
         # Initialize simulation
         simulation = Simulation(car_objects, region_objects, self.app, self.socketio)
         
