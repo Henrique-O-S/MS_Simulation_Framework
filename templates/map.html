@@ -23,7 +23,7 @@
         });
 
         var centerIcon = new L.Icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/3361/3361571.png',
+            iconUrl: 'static/charging-station.png',
             shadowUrl: null,
             iconSize: [50, 50],
             iconAnchor: [12, 41],
@@ -31,63 +31,74 @@
             shadowSize: [41, 41]
         });
 
-        /* var mapIcon = new L.Icon({
-            iconUrl: 'static/mapa.png',
-            shadowUrl: null,
-            iconSize: [700, 300],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-        }); */
-
         // Initialize the map
-        var map = L.map('map').setView([41.16, -8.63], 14);
+        var map = L.map('map').setView([41.16, -8.63], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 20,
         }).addTo(map);
-
-
 
         // Connect to the Socket.IO server
         var socket = io.connect('/');
 
         var markers = {};
+        var circles = {};
+
+        // Function to get color based on stress metric
+        function getColor(stress_metric) {
+            return stress_metric > 1.2 ? 'red' :
+                   stress_metric > 0.9 ? 'darkorange' :
+                   stress_metric > 0.7 ? 'orange' :
+                   stress_metric > 0.5 ? 'yellow' :
+                   stress_metric > 0.4 ? 'yellowgreen' :
+                   stress_metric > 0.2 ? 'green' :
+                                         'lightgreen';
+        }
 
         // Listen for the 'map_updated' event
         socket.on('map_updated', function (data) {
-            //var marker_map = L.marker([41.17, -8.6], { icon: mapIcon }).addTo(map);
             // Update each set of coordinates
             data.region_data.forEach(function (region) {
                 // If a marker for this name already exists and its position has changed, update its position
                 if (markers[region.name]) {
                     markers[region.name].bindPopup("<b>" + region.name + "</b>");
-                    //console.log("need to update");
                 }
                 // Otherwise, if a marker for this name does not exist, create a new marker and store it in the markers object
                 else if (!markers[region.name]) {
                     var marker = L.marker([region.lat, region.lng], { icon: centerIcon }).addTo(map);
                     marker.bindPopup("<b>" + region.name + "</b>");
                     markers[region.name] = marker;
-                    //console.log("need to create");
+                }
+
+                // Draw or update the circle based on the stress metric
+                var color = getColor(region.stress_metric);
+
+                if (circles[region.name]) {
+                    circles[region.name].setLatLng([region.lat, region.lng]);
+                    circles[region.name].setStyle({ color: color, fillColor: color });
+                    circles[region.name].setRadius(1000);
+                } else {
+                    var circle = L.circle([region.lat, region.lng], {
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.5,
+                        radius: 1000
+                    }).addTo(map);
+                    circles[region.name] = circle;
                 }
             });
 
             data.car_data.forEach(function (car) {
-                console.log(car);
                 // If a marker for this name already exists and its position has changed, update its position
                 if (markers[car.name] && !markers[car.name].getLatLng().equals([car.lat, car.lng])) {
                     markers[car.name].setLatLng([car.lat, car.lng]);
                     markers[car.name].bindPopup("<b>" + car.name + "</b>");
-                    //console.log("need to update drone");
                 }
                 // Otherwise, if a marker for this name does not exist, create a new marker and store it in the markers object
                 else if (!markers[car.name]) {
                     var marker = L.marker([car.lat, car.lng], { icon: droneIcon }).addTo(map);
-                    // Include the names of the orders the drone is carrying in the popup
                     var popupContent = "<b>" + car.name + "</b>";
                     marker.bindPopup(popupContent);
                     markers[car.name] = marker;
-                    //console.log("need to create drone");
                 }
             });
         });

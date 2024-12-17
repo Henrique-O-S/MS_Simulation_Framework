@@ -13,7 +13,7 @@ class SimulationVisualization:
 
     def update_visualization(self, cars, regions):
         regions_data = [
-            {'name': region.id, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged}
+            {'name': region.id, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged, 'stress_metric': region.stress_metric}
             for region in regions
         ]
         cars_data = [
@@ -62,4 +62,9 @@ class Simulation:
             else:
                 self.rush_hour = False
             self.run_step()
+            if step % 5 == 0:
+                for region in self.regions:
+                    region.update()
+
+
             time.sleep(1 / 60)  # Simulate 60Hz updates

@@ -15,6 +15,7 @@ class Region_Class:
         self.available_chargers = chargers
         self.queue = queue.Queue()
         self.cars_charged = 0
+        self.stress_metric = 0
 
     def stop_charging(self):
         self.available_chargers += 1
@@ -34,3 +35,8 @@ class Region_Class:
 
     def get_status(self):
         return self.available_chargers, self.queue.qsize()
+    
+    def update(self):
+        # Calculate the stress metric based on available chargers and queue size
+        ALFA = 1
+        self.stress_metric = 1 - (self.available_chargers / self.chargers ) + ALFA * (self.queue.qsize() / self.chargers)
