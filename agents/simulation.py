@@ -57,4 +57,4 @@ class Simulation:
                 break
             print(f"Step {step}")
             self.run_step()
-            #sleep.sleep(1 / 60)  # Simulate 60Hz updates
+            time.sleep(1 / 60)  # Simulate 60Hz updates

@@ -18,7 +18,7 @@ class Car_Class:
         self.id = id
         self.autonomy = autonomy
         self.full_autonomy = autonomy
-        self.velocity = velocity / int(os.getenv("STEPS_PER_DAY")) # km/step
+        self.velocity = velocity / (int(os.getenv("STEPS_PER_DAY")) / 24) # km/step
         self.current_region = current_region
         self.latitude = current_region.latitude
         self.longitude = current_region.longitude
@@ -75,39 +75,37 @@ class Car_Class:
                     self.state = BEFORE_CHARGING
 
         elif self.state == TRAVELING:
-            while self.autonomy > 0:
-                # Move the car towards the destination
-                angle = calculate_angle(
-                    (self.latitude, self.longitude), (self.next_region.latitude, self.next_region.longitude))
-                next_lat, next_long = self.next_pos(angle)
-                future_movement = haversine_distance(
-                    self.latitude, self.longitude, next_lat, next_long)
-                distance = haversine_distance(
-                    self.latitude, self.longitude, self.next_region.latitude, self.next_region.longitude)
-                distance_travelled = 0
-                if future_movement > distance:
-                    self.latitude = self.next_region.latitude
-                    self.longitude = self.next_region.longitude
-                    distance_travelled = distance
-                    self.autonomy -= distance_travelled
-                    self.distance_travelled += distance_travelled
-                    break
+            # Move the car towards the destination
+            angle = calculate_angle(
+                (self.latitude, self.longitude), (self.next_region.latitude, self.next_region.longitude))
+            next_lat, next_long = self.next_pos(angle)
+            future_movement = haversine_distance(
+                self.latitude, self.longitude, next_lat, next_long)
+            distance = haversine_distance(
+                self.latitude, self.longitude, self.next_region.latitude, self.next_region.longitude)
+            distance_travelled = 0
+            if future_movement > distance:
+                self.latitude = self.next_region.latitude
+                self.longitude = self.next_region.longitude
+                distance_travelled = distance
+                self.autonomy -= distance_travelled
+                self.distance_travelled += distance_travelled
+                self.arrived_at_destination()
+                #print("Arrived at destination")
+                if self.charge_at_destination:
+                    self.charge_at_destination = False
+                    self.state = BEFORE_CHARGING
                 else:
-                    self.latitude = next_lat
-                    self.longitude = next_long
-                    distance_travelled = future_movement
+                    self.state = IDLE
+            else:
+                self.latitude = next_lat
+                self.longitude = next_long
+                distance_travelled = future_movement
 
                 # Decrease the car's autonomy based on the distance travelled
                 self.autonomy -= distance_travelled
                 self.distance_travelled += distance_travelled
-
-            self.arrived_at_destination()
-            #print("Arrived at destination")
-            if self.charge_at_destination:
-                self.charge_at_destination = False
-                self.state = BEFORE_CHARGING
-            else:
-                self.state = IDLE
+            
 
         elif self.state == DECIDE_CHARGING:
             reachable_regions = self.reachable_regions()
