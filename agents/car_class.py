@@ -58,10 +58,10 @@ class Car_Class:
     def run(self):
         #print(f"Current battery: {self.get_battery_percentage()}")
         if self.state == IDLE:
-            if self.get_battery_percentage() < 0.3 and random.random() < 0.7:
+            if self.get_battery_percentage() < float(os.getenv("AUTONOMY_TOLERANCE")) and random.random() < float(os.getenv("PROBABILITY_OF_CHARGING")):
                 #print(f"Decided to charge.")
                 self.state = DECIDE_CHARGING
-            elif random.random() < 0.3:  # 30% chance of staying idle
+            elif random.random() < float(os.getenv("CHANCE_OF_STAYING_IDLE")):
                 #print(f"Decided to stay idle for now.")
                 self.state = IDLE
             else:  # Travel if not idling or charging
@@ -118,7 +118,7 @@ class Car_Class:
                 region, (chargers, queue_size) = response
                 distance = haversine_distance(self.latitude, self.longitude, region.latitude, region.longitude)
                 distance += 0.1
-                return 0.7 * (1 / distance) + 0.3 * chargers - 0.01 * queue_size
+                return float(os.getenv("DISTANCE_WEIGHT")) * (1 / distance) + float(os.getenv("AVAILABILITY_WEIGHT")) * chargers - float(os.getenv("QUEUE_WEIGHT")) * queue_size
 
             responses.sort(key=score, reverse=True)
 
@@ -163,7 +163,7 @@ class Car_Class:
                 self.current_region.stop_charging()
                 self.state = IDLE
             else:
-                self.autonomy += 2
+                self.autonomy += float(os.getenv("CHARGING_PER_STEP"))
                 #print(f"{self.id} is still charging. Battery: {self.get_battery_percentage()}")
 
         else:
