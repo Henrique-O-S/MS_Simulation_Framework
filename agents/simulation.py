@@ -57,4 +57,9 @@ class Simulation:
                 break
             print(f"Step {step}")
             self.run_step()
+            if step % 10 == 0:
+                for region in self.regions:
+                    region.update()
+
+
             time.sleep(1 / 60)  # Simulate 60Hz updates
