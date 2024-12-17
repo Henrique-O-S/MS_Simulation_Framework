@@ -54,25 +54,41 @@ class Car_Class:
     def charge(self):
         self.autonomy = self.full_autonomy
 
-    def run(self):
+    def run(self, rush_hour):
         #print(f"Current battery: {self.get_battery_percentage()}")
         if self.state == IDLE:
             if self.get_battery_percentage() < float(os.getenv("AUTONOMY_TOLERANCE")) and random.random() < float(os.getenv("PROBABILITY_OF_CHARGING")):
                 #print(f"Decided to charge.")
                 self.state = DECIDE_CHARGING
-            elif random.random() < float(os.getenv("CHANCE_OF_STAYING_IDLE")):
+            elif rush_hour:
+                print("Rush hour")
+                if random.random() < float(os.getenv("CHANCE_OF_STAYING_IDLE_RUSH_HOUR")):
+                    #print(f"Decided to stay idle for now.")
+                    self.state = IDLE
+                else:  # Travel if not idling or charging
+                    #print(f"Deciding to travel.")
+                    next_region = self.pick_next_region()
+                    if next_region:
+                        self.next_region = next_region
+                        self.state = TRAVELING
+                    else:
+                        #print("No valid region to travel to. Im stuck in region. Going to recharge")
+                        self.stuckAtRegion = True
+                        self.state = BEFORE_CHARGING
+            else:
+                if random.random() < float(os.getenv("CHANCE_OF_STAYING_IDLE")):
                 #print(f"Decided to stay idle for now.")
-                self.state = IDLE
-            else:  # Travel if not idling or charging
-                #print(f"Deciding to travel.")
-                next_region = self.pick_next_region()
-                if next_region:
-                    self.next_region = next_region
-                    self.state = TRAVELING
-                else:
-                    #print("No valid region to travel to. Im stuck in region. Going to recharge")
-                    self.stuckAtRegion = True
-                    self.state = BEFORE_CHARGING
+                    self.state = IDLE
+                else:  # Travel if not idling or charging
+                    #print(f"Deciding to travel.")
+                    next_region = self.pick_next_region()
+                    if next_region:
+                        self.next_region = next_region
+                        self.state = TRAVELING
+                    else:
+                        #print("No valid region to travel to. Im stuck in region. Going to recharge")
+                        self.stuckAtRegion = True
+                        self.state = BEFORE_CHARGING
 
         elif self.state == TRAVELING:
             # Move the car towards the destination

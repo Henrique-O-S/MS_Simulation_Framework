@@ -34,10 +34,11 @@ class Simulation:
         self.regions = regions
         self.visualization = SimulationVisualization(app, socketio)
         self.running = True
+        rush_hour = False
 
     def run_step(self):
         for car in self.cars:
-            car.run()
+            car.run(self.rush_hour)
 
         # Update visualization
         self.visualization.update_visualization(self.cars, self.regions)
@@ -56,5 +57,9 @@ class Simulation:
             if not self.running:
                 break
             print(f"Step {step}")
+            if (step % int(os.getenv("STEPS_PER_DAY")) >= int(os.getenv("STEPS_PER_DAY")) * 7.5 / 24 and step % int(os.getenv("STEPS_PER_DAY")) <= int(os.getenv("STEPS_PER_DAY")) * 9 / 24) or (step % int(os.getenv("STEPS_PER_DAY")) >= int(os.getenv("STEPS_PER_DAY")) * 17 / 24 and step % int(os.getenv("STEPS_PER_DAY")) <= int(os.getenv("STEPS_PER_DAY")) * 19 / 24):
+                self.rush_hour = True
+            else:
+                self.rush_hour = False
             self.run_step()
             time.sleep(1 / 60)  # Simulate 60Hz updates
