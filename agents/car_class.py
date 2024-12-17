@@ -1,6 +1,10 @@
 import random
+import os
+from dotenv import load_dotenv, dotenv_values
 from aux_funcs import haversine_distance, calculate_angle
 from math import sin, cos, radians
+
+load_dotenv()
 
 
 TRAVELING = "[Traveling]"
@@ -14,7 +18,7 @@ class Car_Class:
         self.id = id
         self.autonomy = autonomy
         self.full_autonomy = autonomy
-        self.velocity = velocity * 0.00001666666 * 200  # km/tick
+        self.velocity = velocity / int(os.getenv("STEPS_PER_DAY")) # km/step
         self.current_region = current_region
         self.latitude = current_region.latitude
         self.longitude = current_region.longitude
@@ -52,22 +56,22 @@ class Car_Class:
         self.autonomy = self.full_autonomy
 
     def run(self):
-        print(f"Current battery: {self.get_battery_percentage()}")
+        #print(f"Current battery: {self.get_battery_percentage()}")
         if self.state == IDLE:
             if self.get_battery_percentage() < 0.3 and random.random() < 0.7:
-                print(f"Decided to charge.")
+                #print(f"Decided to charge.")
                 self.state = DECIDE_CHARGING
             elif random.random() < 0.3:  # 30% chance of staying idle
-                print(f"Decided to stay idle for now.")
+                #print(f"Decided to stay idle for now.")
                 self.state = IDLE
             else:  # Travel if not idling or charging
-                print(f"Deciding to travel.")
+                #print(f"Deciding to travel.")
                 next_region = self.pick_next_region()
                 if next_region:
                     self.next_region = next_region
                     self.state = TRAVELING
                 else:
-                    print("No valid region to travel to. Im stuck in region. Going to recharge")
+                    #print("No valid region to travel to. Im stuck in region. Going to recharge")
                     self.stuckAtRegion = True
                     self.state = BEFORE_CHARGING
 
@@ -99,7 +103,7 @@ class Car_Class:
                 self.distance_travelled += distance_travelled
 
             self.arrived_at_destination()
-            print("Arrived at destination")
+            #print("Arrived at destination")
             if self.charge_at_destination:
                 self.charge_at_destination = False
                 self.state = BEFORE_CHARGING
@@ -120,45 +124,47 @@ class Car_Class:
 
             charging_region = responses[0][0] if responses else None
 
-            print(f"Charging region picked: {charging_region}")
+            #print(f"Charging region picked: {charging_region}")
 
             if self.currentRegion.id == charging_region.id:
-                print("Already at charging region")
+                #print("Already at charging region")
                 self.state = BEFORE_CHARGING
             else:
                 for region in self.regions:
                     if region.id == charging_region.id:
-                        print(f"Charging region found: {region}")
+                        #print(f"Charging region found: {region}")
                         self.charge_at_destination = True
                         self.next_region = region
                         self.state = TRAVELING
         elif self.state == BEFORE_CHARGING:
             if self.stuck_at_region:
-                print("Stuck at region. Charging now.")
+                #print("Stuck at region. Charging now.")
                 if self.current_region.start_charging(self):
                         self.charge()
                         self.stuck_at_region = False
                         self.state = CHARGING
                 else:
-                    print("Waiting for charger.")
+                    #print("Waiting for charger.")
+                    pass
             else:
-                print("Charging at destination.")
+                #print("Charging at destination.")
                 if self.current_region.start_charging(self):
                         self.charge()
                         self.stuck_at_region = False
                         self.state = CHARGING
                 else:
-                    print("Waiting for charger.")
+                    #print("Waiting for charger.")
+                    pass
 
         elif self.state == CHARGING:
-            print(f"{self.id} has started charging at {self.current_region}")
+            #print(f"{self.id} has started charging at {self.current_region}")
             if self.autonomy == self.full_autonomy:
-                print(f"{self.id} has finished charging. Battery full.")
+                #print(f"{self.id} has finished charging. Battery full.")
                 self.current_region.stop_charging()
                 self.state = IDLE
             else:
                 self.autonomy += 2
-                print(f"{self.id} is still charging. Battery: {self.get_battery_percentage()}")
+                #print(f"{self.id} is still charging. Battery: {self.get_battery_percentage()}")
 
         else:
             print("Deu raia")

@@ -35,7 +35,7 @@ class Simulation:
         self.visualization = SimulationVisualization(app, socketio)
         self.running = True
 
-    async def run_step(self):
+    def run_step(self):
         for car in self.cars:
             car.run()
 
@@ -51,10 +51,10 @@ class Simulation:
         # Placeholder for simulation end conditions
         return False
 
-    async def run(self, steps):
+    def run(self, steps):
         for step in range(steps):
             if not self.running:
                 break
             print(f"Step {step}")
-            await self.run_step()
-            await asyncio.sleep(1 / 60)  # Simulate 60Hz updates
+            self.run_step()
+            #sleep.sleep(1 / 60)  # Simulate 60Hz updates

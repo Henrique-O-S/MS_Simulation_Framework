@@ -2,6 +2,7 @@ import csv
 import asyncio
 import os
 import threading
+from dotenv import load_dotenv, dotenv_values 
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 from flask_cors import CORS
@@ -12,6 +13,8 @@ from car_seeder import CarSeeder
 from agents.simulation import Simulation
 from agents.car_class import Car_Class
 from agents.region_class import Region_Class
+
+load_dotenv()
 
 class Application:
     def __init__(self):
@@ -72,7 +75,7 @@ class Application:
         for region in region_objects:
             for car_model in cars_data[region.id]:
                 for _ in range(cars_data[region.id][car_model]):
-                    car = Car_Class(car_model.id, car_model.autonomy, 50, region, region_objects)
+                    car = Car_Class(car_model.id, car_model.autonomy, int(os.getenv("CAR_VELOCITY")), region, region_objects)
                     car_objects.append(car)
 
         #THIS IS FOR TESTING
@@ -83,11 +86,8 @@ class Application:
         simulation = Simulation(car_objects, region_objects, self.app, self.socketio)
         
         print("Starting simulation...")
-        async def run_simulation():
-            await simulation.run(steps=1440)  # Set the number of steps as needed
+        simulation.run(steps=int(os.getenv("STEPS_PER_DAY"))*int(os.getenv("NUMBER_OF_DAYS")))  # Set the number of steps as needed
 
-        # Run simulation loop
-        asyncio.run(run_simulation())
 
 
 if __name__ == "__main__":
