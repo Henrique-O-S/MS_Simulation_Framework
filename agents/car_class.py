@@ -155,8 +155,9 @@ class Car_Class:
 
         elif self.state == CHARGING:
             #print(f"{self.id} has started charging at {self.current_region}")
-            if self.autonomy == self.full_autonomy:
+            if self.autonomy >= self.full_autonomy:
                 #print(f"{self.id} has finished charging. Battery full.")
+                self.autonomy = self.full_autonomy
                 self.current_region.stop_charging()
                 self.state = IDLE
             else:

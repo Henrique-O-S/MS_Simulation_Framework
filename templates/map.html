@@ -32,7 +32,7 @@
         });
 
         // Initialize the map
-        var map = L.map('map').setView([41.16, -8.63], 14);
+        var map = L.map('map').setView([41.16, -8.63], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 20,
         }).addTo(map);
@@ -45,14 +45,13 @@
 
         // Function to get color based on stress metric
         function getColor(stress_metric) {
-            return stress_metric > 1.5 ? 'red' :
-                   stress_metric > 1.2 ? 'darkorange' :
-                   stress_metric > 1.0 ? 'orange' :
-                   stress_metric > 0.8 ? 'yellow' :
-                   stress_metric > 0.6 ? 'yellowgreen' :
-                   stress_metric > 0.4 ? 'green' :
-                   stress_metric > 0.2 ? 'lightgreen' :
-                                         'lightblue';
+            return stress_metric > 1.2 ? 'red' :
+                   stress_metric > 0.9 ? 'darkorange' :
+                   stress_metric > 0.7 ? 'orange' :
+                   stress_metric > 0.5 ? 'yellow' :
+                   stress_metric > 0.4 ? 'yellowgreen' :
+                   stress_metric > 0.2 ? 'green' :
+                                         'lightgreen';
         }
 
         // Listen for the 'map_updated' event
@@ -72,18 +71,17 @@
 
                 // Draw or update the circle based on the stress metric
                 var color = getColor(region.stress_metric);
-                var radius = 500 * region.stress_metric; // Adjust the radius as needed
 
                 if (circles[region.name]) {
                     circles[region.name].setLatLng([region.lat, region.lng]);
                     circles[region.name].setStyle({ color: color, fillColor: color });
-                    circles[region.name].setRadius(radius);
+                    circles[region.name].setRadius(1000);
                 } else {
                     var circle = L.circle([region.lat, region.lng], {
                         color: color,
                         fillColor: color,
                         fillOpacity: 0.5,
-                        radius: radius
+                        radius: 1000
                     }).addTo(map);
                     circles[region.name] = circle;
                 }

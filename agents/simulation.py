@@ -13,7 +13,7 @@ class SimulationVisualization:
 
     def update_visualization(self, cars, regions):
         regions_data = [
-            {'name': region.id, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged}
+            {'name': region.id, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged, 'stress_metric': region.stress_metric}
             for region in regions
         ]
         cars_data = [
@@ -57,7 +57,7 @@ class Simulation:
                 break
             print(f"Step {step}")
             self.run_step()
-            if step % 10 == 0:
+            if step % 5 == 0:
                 for region in self.regions:
                     region.update()
 
