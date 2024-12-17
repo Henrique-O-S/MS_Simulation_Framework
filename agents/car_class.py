@@ -1,7 +1,7 @@
 import random
 import os
 from dotenv import load_dotenv, dotenv_values
-from aux_funcs import haversine_distance, calculate_angle
+from aux_funcs import haversine_distance, calculate_angle, region_distances
 from math import sin, cos, radians
 
 load_dotenv()
@@ -37,8 +37,7 @@ class Car_Class:
         self.next_region = None
 
     def reachable_regions(self):
-        return [region for region in self.regions if haversine_distance(
-            self.latitude, self.longitude, region.latitude, region.longitude) < self.autonomy]
+        return [region for region in self.regions if region_distances[self.current_region.id][region.id] < self.autonomy]
 
     def pick_next_region(self):
         valid_regions = [region for region in self.reachable_regions() if region != self.current_region]
@@ -116,7 +115,7 @@ class Car_Class:
 
             def score(response):
                 region, (chargers, queue_size) = response
-                distance = haversine_distance(self.latitude, self.longitude, region.latitude, region.longitude)
+                distance = region_distances[self.current_region.id][region.id]
                 distance += 0.1
                 return float(os.getenv("DISTANCE_WEIGHT")) * (1 / distance) + float(os.getenv("AVAILABILITY_WEIGHT")) * chargers - float(os.getenv("QUEUE_WEIGHT")) * queue_size
 

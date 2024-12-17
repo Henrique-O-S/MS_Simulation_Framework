@@ -14,6 +14,7 @@ from agents.simulation import Simulation
 from agents.car_class import Car_Class
 from agents.region_class import Region_Class
 
+
 load_dotenv()
 
 class Application:
@@ -68,7 +69,7 @@ class Application:
         for region in regions:
             region_objects.append(Region_Class(
                 region.id, region.latitude, region.longitude, region.chargers))
-
+            
         # Generate cars based on models and regions
         cars_data = CarSeeder(car_models, regions).run()
         car_objects = []
