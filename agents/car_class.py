@@ -19,7 +19,7 @@ class Car_Class:
     def __init__(self, id, autonomy, velocity, current_region, regions):
         self.id = id
         self.full_autonomy = autonomy
-        self.autonomy = autonomy * random.uniform(0.3, 1.0)
+        self.autonomy = autonomy * random.uniform(0.5, 1.0)
         self.velocity = velocity / (int(os.getenv("STEPS_PER_DAY")) / 24) # km/step
         self.current_region = current_region
         self.home_region = current_region
