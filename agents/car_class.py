@@ -12,6 +12,8 @@ IDLE = "[Idle]"
 CHARGING = "[Charging]"
 BEFORE_CHARGING = "[BeforeCharging]"
 DECIDE_CHARGING = "[DecideCharging]"
+CHARGING_AT_HOME = "[ChargingAtHome]"
+IN_QUEUE = "[InQueue]"
 
 class Car_Class:
     def __init__(self, id, autonomy, velocity, current_region, regions):
@@ -20,6 +22,7 @@ class Car_Class:
         self.full_autonomy = autonomy
         self.velocity = velocity / (int(os.getenv("STEPS_PER_DAY")) / 24) # km/step
         self.current_region = current_region
+        self.home_region = current_region
         self.latitude = current_region.latitude
         self.longitude = current_region.longitude
         self.distance_travelled = 0
@@ -58,10 +61,13 @@ class Car_Class:
         #print(f"Current battery: {self.get_battery_percentage()}")
         if self.state == IDLE:
             if self.get_battery_percentage() < float(os.getenv("AUTONOMY_TOLERANCE")) and random.random() < float(os.getenv("PROBABILITY_OF_CHARGING")):
-                #print(f"Decided to charge.")
-                self.state = DECIDE_CHARGING
+                if self.current_region == self.home_region and random.random() < float(os.getenv("PROBABILITY_OF_CHARGING_AT_HOME")):
+                    #print(f"{self.id} has started charging at home")
+                    self.state = CHARGING
+                else:
+                    #print(f"Decided to charge.")
+                    self.state = DECIDE_CHARGING
             elif rush_hour:
-                print("Rush hour")
                 if random.random() < float(os.getenv("CHANCE_OF_STAYING_IDLE_RUSH_HOUR")):
                     #print(f"Decided to stay idle for now.")
                     self.state = IDLE
@@ -77,7 +83,7 @@ class Car_Class:
                         self.state = BEFORE_CHARGING
             else:
                 if random.random() < float(os.getenv("CHANCE_OF_STAYING_IDLE")):
-                #print(f"Decided to stay idle for now.")
+                #print(f"Decided to stay idle for now."
                     self.state = IDLE
                 else:  # Travel if not idling or charging
                     #print(f"Deciding to travel.")
@@ -149,25 +155,29 @@ class Car_Class:
                         self.charge_at_destination = True
                         self.next_region = region
                         self.state = TRAVELING
+
         elif self.state == BEFORE_CHARGING:
             if self.stuck_at_region:
                 #print("Stuck at region. Charging now.")
                 if self.current_region.start_charging(self):
-                        self.charge()
                         self.stuck_at_region = False
                         self.state = CHARGING
                 else:
                     #print("Waiting for charger.")
+                    self.state = IN_QUEUE
                     pass
             else:
                 #print("Charging at destination.")
                 if self.current_region.start_charging(self):
-                        self.charge()
                         self.stuck_at_region = False
                         self.state = CHARGING
                 else:
                     #print("Waiting for charger.")
+                    self.state = IN_QUEUE
                     pass
+
+        elif self.state == IN_QUEUE:
+            pass
 
         elif self.state == CHARGING:
             #print(f"{self.id} has started charging at {self.current_region}")
@@ -179,6 +189,15 @@ class Car_Class:
             else:
                 self.autonomy += float(os.getenv("CHARGING_PER_STEP"))
                 #print(f"{self.id} is still charging. Battery: {self.get_battery_percentage()}")
+
+        elif self.state == CHARGING_AT_HOME:
+            if self.autonomy >= self.full_autonomy:
+                #print(f"{self.id} has finished charging. Battery full.")
+                self.autonomy = self.full_autonomy
+                self.state = IDLE
+            else:
+                self.autonomy += float(os.getenv("CHARGING_PER_STEP"))
+                #print(f"{self.id} is still charging at home. Battery: {self.get_battery_percentage()}
 
         else:
             print("Deu raia")
