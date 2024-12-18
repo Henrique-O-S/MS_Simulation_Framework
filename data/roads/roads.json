@@ -1,0 +1,38 @@
+{
+    "aldoar": {
+        "ramalde": 1,
+        "lordelo": 1
+    },
+    "ramalde": {
+        "aldoar": 1,
+        "lordelo": 3,
+        "paranhos": 3,
+        "centro": 3
+    },
+    "lordelo": {
+        "aldoar": 1,
+        "ramalde": 3,
+        "centro": 3
+    },
+    "paranhos": {
+        "ramalde": 3,
+        "centro": 3,
+        "bonfim": 1,
+        "campanha": 2
+    },
+    "centro": {
+        "ramalde": 3,
+        "lordelo": 3,
+        "paranhos": 3,
+        "bonfim": 2
+    },
+    "bonfim": {
+        "paranhos": 1,
+        "centro": 2,
+        "campanha": 1
+    },
+    "campanha": {
+        "paranhos": 2,
+        "bonfim": 1
+    }
+}
