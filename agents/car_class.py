@@ -18,8 +18,8 @@ IN_QUEUE = "[InQueue]"
 class Car_Class:
     def __init__(self, id, autonomy, velocity, current_region, regions):
         self.id = id
-        self.autonomy = autonomy
         self.full_autonomy = autonomy
+        self.autonomy = autonomy * random.uniform(0.3, 1.0)
         self.velocity = velocity / (int(os.getenv("STEPS_PER_DAY")) / 24) # km/step
         self.current_region = current_region
         self.home_region = current_region
@@ -36,7 +36,7 @@ class Car_Class:
         return self.autonomy / self.full_autonomy
     
     def arrived_at_destination(self):
-        self.currentRegion = self.next_region
+        self.current_region = self.next_region
         self.next_region = None
 
     def reachable_regions(self):
@@ -145,7 +145,7 @@ class Car_Class:
 
             #print(f"Charging region picked: {charging_region}")
 
-            if self.currentRegion.id == charging_region.id:
+            if self.current_region.id == charging_region.id:
                 #print("Already at charging region")
                 self.state = BEFORE_CHARGING
             else:
