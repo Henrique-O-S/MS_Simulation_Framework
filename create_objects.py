@@ -90,6 +90,8 @@ class Application:
         print("Starting simulation...")
         simulation.run(steps=int(os.getenv("STEPS_PER_DAY"))*int(os.getenv("NUMBER_OF_DAYS")))  # Set the number of steps as needed
 
+        print("Simulation ended.")
+
 
 
 if __name__ == "__main__":
