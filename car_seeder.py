@@ -1,10 +1,14 @@
 import numpy as np
 import random
+import os
+from dotenv import load_dotenv, dotenv_values
 import matplotlib.pyplot as plt
+
+load_dotenv()
 
 
 class CarSeeder:
-    def __init__(self, cars, regions, salary_fluctuation = 0.325, percentage_willing_to_spend = 0.15, probability_of_buying=0.3):
+    def __init__(self, cars, regions, salary_fluctuation = float(os.getenv("SALARY_FLUCTUATION")), percentage_willing_to_spend = float(os.getenv("PERCENTAGE_WILLING_TO_SPEND")), probability_of_buying=float(os.getenv("PROBABILTY_OF_BUYING"))):
         self.cars = cars
         self.regions = regions
         self.salaryFluctuation = salary_fluctuation

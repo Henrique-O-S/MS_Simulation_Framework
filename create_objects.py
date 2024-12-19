@@ -2,19 +2,21 @@ import csv
 import asyncio
 import os
 import threading
+import time
+from dotenv import load_dotenv, dotenv_values 
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 from flask_cors import CORS
-from spade.agent import Agent
-from agents.region import RegionAgent
-from agents.world import WorldAgent
-from agents.car import CarAgent
 from models.region import Region
 from models.car import CarModel
 from aux_funcs import extract_numeric_value
 from car_seeder import CarSeeder
-import time
+from agents.simulation import Simulation
+from agents.car_class import Car_Class
+from agents.region_class import Region_Class
 
+
+load_dotenv()
 
 class Application:
     def __init__(self):
@@ -49,57 +51,47 @@ class Application:
                 car_id, autonomy, price = row
                 autonomy = int(autonomy)
                 price = int(price)
-                cars.append(CarModel(car_id, autonomy, price))  
-
+                cars.append(CarModel(car_id, autonomy, price))
 
     def main(self):
-        regions = []
         region_file = "data/regions.csv"
-        carModels = []
         car_file = "data/cars.csv"
-        agents = []
+        regions = []
+        car_models = []
+
+        # Read input data
         if os.path.exists(region_file):
             self.read_region_csv(region_file, regions)
         if os.path.exists(car_file):
-            self.read_car_csv(car_file, carModels)
+            self.read_car_csv(car_file, car_models)
 
-        carsData = CarSeeder(carModels, regions).run()
-        carAgents = []
-        regionAgents = []
-        region_jids = {}
+
+        region_objects = []
         for region in regions:
-            jid = f"{region.id}@localhost"
-            region_jids[region.id] = jid
-            agents.append(RegionAgent(
-                jid, "1234", region.latitude, region.longitude, region.chargers))
-        #CHOOSE ONE OF THE COMMENTS BELOW
+            region_objects.append(Region_Class(
+                region.id, region.latitude, region.longitude, region.chargers))
+            
+        # Generate cars based on models and regions
+        cars_data = CarSeeder(car_models, regions).run()
+        car_objects = []
+        for region in region_objects:
+            for car_model in cars_data[region.id]:
+                for _ in range(cars_data[region.id][car_model]):
+                    car = Car_Class(car_model.id, car_model.autonomy, int(os.getenv("CAR_VELOCITY")), region, region_objects)
+                    car_objects.append(car)
 
-            #THIS IS NORMAL SIMULATION
-        for region in regions:
-            count = 1
-            for carModel in carsData[region.id]:
-                for _ in range(carsData[region.id][carModel]):
-                    jid = f"{carModel.id}_{region.id}_{count}@localhost"
-                    agents.append(CarAgent(
-                        jid, "1234", carModel.autonomy, 50, region, regions, region_jids))
+        #THIS IS FOR TESTING
+        '''car_objects.append(Car_Class(
+            "low_end_ramalde_1", 100, 50, region_objects[0], region_objects))'''
 
-            #THIS IS FOR TESTING
-        '''agents.append(CarAgent(
-            "low_end_ramalde_1@localhost", "1234", 100, 50, regions[0], regions, region_jids))'''
+        # Initialize simulation
+        simulation = Simulation(car_objects, region_objects, self.app, self.socketio)
         
-        carAgents = [agent for agent in agents if isinstance(agent, CarAgent)]
-        regionAgents = [agent for agent in agents if isinstance(agent, RegionAgent)]
-        
+        print("Starting simulation...")
+        simulation.run(steps=int(os.getenv("STEPS_PER_DAY"))*int(os.getenv("NUMBER_OF_DAYS")))  # Set the number of steps as needed
 
-        self.world_agent = WorldAgent(
-            "world@localhost", "1234", regionAgents, carAgents, self.app, self.socketio)
-        agents.append(self.world_agent)
-        print("starting")
-        async def run_agents():
-            for agent in agents:
-                await agent.start(auto_register=True)
-        print("done")
-        asyncio.run(run_agents())
+        print("Simulation ended.")
+
 
 
 if __name__ == "__main__":
@@ -110,8 +102,8 @@ if __name__ == "__main__":
         target=app.socketio.run, args=(app.app,), kwargs={'port': 8000})
     server_thread.start()
 
-# Start the agents
-app.main()
+    # Start the simulation
+    app.main()
 
-# Wait for the server thread to finish
-server_thread.join()
+    # Wait for the server thread to finish
+    server_thread.join()
