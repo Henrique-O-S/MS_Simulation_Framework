@@ -1,0 +1,29 @@
+{
+    "nodes": [
+        "aldoar",
+        "ramalde",
+        "lordelo",
+        "paranhos",
+        "centro",
+        "bonfim",
+        "campanha"
+    ],
+    "edges": [
+        ["aldoar", "ramalde", 1],
+        ["aldoar", "lordelo", 1],
+
+        ["ramalde", "lordelo", 3],
+        ["ramalde", "paranhos", 3],
+        ["ramalde", "centro", 3],
+
+        ["lordelo", "centro", 3],
+
+        ["paranhos", "centro", 3],
+        ["paranhos", "bonfim", 1],
+        ["paranhos", "campanha", 2],
+
+        ["centro", "bonfim", 2],
+        
+        ["bonfim", "campanha", 1]
+    ]
+}
