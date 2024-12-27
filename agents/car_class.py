@@ -44,10 +44,10 @@ class Car_Class:
 
     def pick_next_region(self):
         valid_regions = [region for region in self.reachable_regions() if region != self.current_region]
-        if len(valid_regions) == 0:
+        if not valid_regions:
             return None
-        return random.choice(valid_regions)
-
+        traffic = [region.traffic if region != self.home_region else 30 for region in valid_regions]
+        return random.choices(valid_regions, weights=traffic, k=1)[0]
 
     def next_pos(self, angle):
         new_latitude = self.latitude + self.velocity * sin(angle) / 111.2

@@ -34,14 +34,15 @@ class Application:
             reader = csv.reader(csvfile, delimiter=";")
             next(reader)  # Skip the header
             for row in reader:
-                region_id, latitude, longitude, avg_pop, driving_perc, avg_m_inc, chargers = row
+                region_id, latitude, longitude, avg_pop, driving_perc, avg_m_inc, chargers, traffic = row
                 latitude = float(latitude.replace(",", "."))
                 longitude = float(longitude.replace(",", "."))
                 avg_pop = int(avg_pop)
                 driving_perc = float(driving_perc.replace(",", "."))
                 avg_m_inc = float(avg_m_inc.replace(",", "."))
                 chargers = int(chargers)
-                regions.append(Region(region_id, latitude, longitude, int(avg_pop * driving_perc), avg_m_inc, chargers))
+                traffic = int(traffic)
+                regions.append(Region(region_id, latitude, longitude, int(avg_pop * driving_perc), avg_m_inc, chargers, traffic))
 
     def read_car_csv(self, filename, cars):
         with open(filename, "r") as csvfile:
@@ -69,7 +70,7 @@ class Application:
         region_objects = []
         for region in regions:
             region_objects.append(Region_Class(
-                region.id, region.latitude, region.longitude, region.chargers))
+                region.id, region.latitude, region.longitude, region.chargers, region.traffic))
             
         # Generate cars based on models and regions
         cars_data = CarSeeder(car_models, regions).run()

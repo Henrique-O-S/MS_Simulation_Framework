@@ -7,11 +7,12 @@ BEFORE_CHARGING = "[BeforeCharging]"
 DECIDE_CHARGING = "[DecideCharging]"
 
 class Region_Class:
-    def __init__(self, id, latitude, longitude, chargers):
+    def __init__(self, id, latitude, longitude, chargers, traffic):
         self.id = id
         self.latitude = latitude
         self.longitude = longitude
         self.chargers = chargers
+        self.traffic = traffic
         self.available_chargers = chargers
         self.queue = queue.Queue()
         self.cars_charged = 0

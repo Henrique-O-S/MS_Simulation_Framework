@@ -1,5 +1,5 @@
 class Region:
-    def __init__(self, id, latitude, longitude, avg_drivers, avg_income, chargers):
+    def __init__(self, id, latitude, longitude, avg_drivers, avg_income, chargers, traffic):
         self.id = id
         self.latitude = float(latitude)
         self.longitude = float(longitude)
@@ -8,6 +8,7 @@ class Region:
         self.chargers = int(chargers)
         self.available_chargers = chargers
         self.carsCharged = 0
+        self.traffic = int(traffic)
     
     def _get_available_chargers(self):
         return self.available_chargers
