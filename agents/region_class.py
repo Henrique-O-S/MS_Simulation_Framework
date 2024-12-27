@@ -1,5 +1,7 @@
 import queue
 
+from log import Logger
+
 TRAVELING = "[Traveling]"
 IDLE = "[Idle]"
 CHARGING = "[Charging]"
@@ -17,10 +19,15 @@ class Region_Class:
         self.queue = queue.Queue()
         self.cars_charged = 0
         self.stress_metric = 0
+        self.logger = Logger(filename=str(id))
 
     def stop_charging(self):
         self.available_chargers += 1
         self.cars_charged += 1
+        self.logger.log("Car has stopped charging")
+        self.logger.log("Available chargers: " + str(self.available_chargers))
+        self.logger.log("Cars charged: " + str(self.cars_charged))
+        self.logger.log("")
         if not self.queue.empty():
             next_car = self.queue.get()
             self.start_charging(next_car)
@@ -29,9 +36,15 @@ class Region_Class:
     def start_charging(self, car):
         if self.available_chargers > 0:
             self.available_chargers -= 1
+            self.logger.log("Car has started charging")
+            self.logger.log("Available chargers: " + str(self.available_chargers))
+            self.logger.log("")
             return True
         else:
             self.queue.put(car)
+            self.logger.log("Car has been queued")
+            self.logger.log("Queue size: " + str(self.queue.qsize()))
+            self.logger.log("")
             return False
 
     def get_status(self):
