@@ -20,6 +20,8 @@ load_dotenv()
 
 class Application:
     def __init__(self):
+        self.delete_logs()
+        
         self.app = Flask(__name__)
         # Set CORS allowed origins to "*"
         CORS(self.app, resources={r"/*": {"origins": "*"}})
@@ -28,6 +30,14 @@ class Application:
         @self.app.route('/')
         def index():
             return render_template('map.html')
+        
+    def delete_logs(self):
+        for filename in os.listdir("logs/"):
+            file_path = os.path.join("logs/", filename)
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
 
     def read_region_csv(self, filename, regions):
         with open(filename, "r") as csvfile:
