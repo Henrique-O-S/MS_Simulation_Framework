@@ -20,6 +20,8 @@ load_dotenv()
 
 class Application:
     def __init__(self):
+        self.delete_logs()
+        
         self.app = Flask(__name__)
         # Set CORS allowed origins to "*"
         CORS(self.app, resources={r"/*": {"origins": "*"}})
@@ -28,6 +30,14 @@ class Application:
         @self.app.route('/')
         def index():
             return render_template('map.html')
+        
+    def delete_logs(self):
+        for filename in os.listdir("logs/"):
+            file_path = os.path.join("logs/", filename)
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
 
     def read_region_csv(self, filename, regions):
         with open(filename, "r") as csvfile:
@@ -54,7 +64,7 @@ class Application:
                 price = int(price)
                 cars.append(CarModel(car_id, autonomy, price))
 
-    def main(self):
+    def main(self):  
         region_file = "data/regions.csv"
         car_file = "data/cars.csv"
         regions = []
@@ -77,8 +87,9 @@ class Application:
         car_objects = []
         for region in region_objects:
             for car_model in cars_data[region.id]:
-                for _ in range(cars_data[region.id][car_model]):
-                    car = Car_Class(car_model.id, car_model.autonomy, int(os.getenv("CAR_VELOCITY")), region, region_objects)
+                for i in range(cars_data[region.id][car_model]):
+                    id = region.id + '_' + car_model.id + '_' + str(i)
+                    car = Car_Class(id, car_model.autonomy, int(os.getenv("CAR_VELOCITY")), region, region_objects)
                     car_objects.append(car)
 
         #THIS IS FOR TESTING
