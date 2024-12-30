@@ -64,7 +64,7 @@ class Application:
                 price = int(price)
                 cars.append(CarModel(car_id, autonomy, price))
 
-    def main(self):
+    def main(self):  
         region_file = "data/regions.csv"
         car_file = "data/cars.csv"
         regions = []
@@ -87,8 +87,9 @@ class Application:
         car_objects = []
         for region in region_objects:
             for car_model in cars_data[region.id]:
-                for _ in range(cars_data[region.id][car_model]):
-                    car = Car_Class(car_model.id, car_model.autonomy, int(os.getenv("CAR_VELOCITY")), region, region_objects)
+                for i in range(cars_data[region.id][car_model]):
+                    id = region.id + '_' + car_model.id + '_' + str(i)
+                    car = Car_Class(id, car_model.autonomy, int(os.getenv("CAR_VELOCITY")), region, region_objects)
                     car_objects.append(car)
 
         #THIS IS FOR TESTING

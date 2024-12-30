@@ -5,11 +5,12 @@ class Logger:
         self.logger = logging.getLogger(filename)
         filepath = "logs/" + filename + ".log"
         
-        handler = logging.FileHandler(filepath)
-        formatter = logging.Formatter("%(message)s")
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-        self.logger.setLevel(logging.INFO)
+        if not self.logger.handlers:
+            handler = logging.FileHandler(filepath)
+            formatter = logging.Formatter("%(message)s")
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
+            self.logger.setLevel(logging.INFO)
     
     def log(self, message):
         self.logger.info(message)    
