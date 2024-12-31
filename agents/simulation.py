@@ -7,18 +7,30 @@ from flask_socketio import SocketIO
 
 
 class SimulationVisualization:
-    def __init__(self, app, socketio):
+    def __init__(self, app, socketio, regions, cars):
         self.app = app
         self.socketio = socketio
+        self.regions = regions
+        self.select_cars_for_display(cars)
+        
+    def select_cars_for_display(self, cars):
+        def get_random_cars(cars, prefix, count=10):
+            filtered_cars = [car for car in cars if car.id.startswith(prefix)]
+            return random.sample(filtered_cars, min(len(filtered_cars), count))
+        
+        region_names = [region.id for region in self.regions]
+        self.displayed_cars = []
+        for name in region_names:
+            self.displayed_cars.extend(get_random_cars(cars, name))
 
-    def update_visualization(self, cars, regions):
+    def update_visualization(self):
         regions_data = [
             {'name': region.id, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged, 'stress_metric': region.stress_metric}
-            for region in regions
+            for region in self.regions
         ]
         cars_data = [
             {'name': car.id, 'lat': car.latitude, 'lng': car.longitude}
-            for car in cars
+            for car in self.displayed_cars
         ]
         self.socketio.emit('map_updated', {'region_data': regions_data, 'car_data': cars_data})
 
@@ -32,7 +44,7 @@ class Simulation:
     def __init__(self, cars, regions, app, socketio):
         self.cars = cars
         self.regions = regions
-        self.visualization = SimulationVisualization(app, socketio)
+        self.visualization = SimulationVisualization(app, socketio, regions, cars)
         self.running = True
         self.rush_hour = False
 
@@ -41,7 +53,7 @@ class Simulation:
             car.run(self.rush_hour)
 
         # Update visualization
-        self.visualization.update_visualization(self.cars, self.regions)
+        self.visualization.update_visualization()
 
         # Check end conditions (e.g., all cars idle, no regions active, etc.)
         if self.check_simulation_end():

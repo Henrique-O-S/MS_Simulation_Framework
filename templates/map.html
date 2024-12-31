@@ -13,7 +13,7 @@
 
     <script>
 
-        var droneIcon = new L.Icon({
+        var carIcon = new L.Icon({
             iconUrl: 'static/car2.png',
             shadowUrl: null,
             iconSize: [45, 30],
@@ -95,7 +95,7 @@
                 }
                 // Otherwise, if a marker for this name does not exist, create a new marker and store it in the markers object
                 else if (!markers[car.name]) {
-                    var marker = L.marker([car.lat, car.lng], { icon: droneIcon }).addTo(map);
+                    var marker = L.marker([car.lat, car.lng], { icon: carIcon }).addTo(map);
                     var popupContent = "<b>" + car.name + "</b>";
                     marker.bindPopup(popupContent);
                     markers[car.name] = marker;
