@@ -32,6 +32,7 @@ class Car_Class:
         self.charge_at_destination = False
         self.stuck_at_region = False
         self.state = IDLE
+        self.displayed = False
         self.logger = Logger(filename="cars")
 
     def get_battery_percentage(self):

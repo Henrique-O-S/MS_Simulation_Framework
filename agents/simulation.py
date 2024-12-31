@@ -14,14 +14,18 @@ class SimulationVisualization:
         self.select_cars_for_display(cars)
         
     def select_cars_for_display(self, cars):
-        def get_random_cars(cars, prefix, count=10):
+        def get_random_cars(cars, prefix, count=5):
             filtered_cars = [car for car in cars if car.id.startswith(prefix)]
             return random.sample(filtered_cars, min(len(filtered_cars), count))
         
         region_names = [region.id for region in self.regions]
         self.displayed_cars = []
         for name in region_names:
-            self.displayed_cars.extend(get_random_cars(cars, name))
+            selected_cars = get_random_cars(cars, name)
+            for car in selected_cars:
+                car.displayed = True
+                print(car.id, car.displayed)
+            self.displayed_cars.extend(selected_cars)
 
     def update_visualization(self):
         regions_data = [
