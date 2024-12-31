@@ -33,6 +33,8 @@ class Application:
         
     def delete_logs(self):
         for filename in os.listdir("logs/"):
+            if filename == ".gitignore":
+                continue
             file_path = os.path.join("logs/", filename)
             try:
                 os.remove(file_path)
