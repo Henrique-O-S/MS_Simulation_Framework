@@ -65,8 +65,8 @@ class Car_Class:
         if self.get_battery_percentage() < float(os.getenv("AUTONOMY_TOLERANCE")):
             self.consider_charging()
         else:
-            travel_probability = float(os.getenv("CHANCE_OF_TRAVELING_RUSH_HOUR")) if rush_hour else float(os.getenv("CHANCE_OF_TRAVELING"))
-            if random.random() < travel_probability:
+            idle_probability = float(os.getenv("CHANCE_OF_STAYING_IDLE_RUSH_HOUR")) if rush_hour else float(os.getenv("CHANCE_OF_STAYING_IDLE"))
+            if random.random() >= idle_probability:
                 self.consider_traveling()
 
     def consider_charging(self):
