@@ -172,7 +172,7 @@ class Car_Class:
             
 # ---------------------------------------------------------------------------------------------------------------
 
-    def run(self, rush_hour):
+    def run(self, step, rush_hour):
         car_number = int(self.id.split("_")[-1])
         if self.id.startswith("aldoar_low_end") and car_number in range(10):
             self.logger.log(f"{self.id} {self.state}")

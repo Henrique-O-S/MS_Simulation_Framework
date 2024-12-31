@@ -1,4 +1,5 @@
 import queue
+import json
 
 from log import Logger
 
@@ -20,6 +21,10 @@ class Region_Class:
         self.cars_charged = 0
         self.stress_metric = 0
         self.logger = Logger(filename=str(id))
+        
+        # results
+        self.charger_history = []
+        self.queue_history = []
 
     def stop_charging(self):
         self.available_chargers += 1
@@ -54,3 +59,17 @@ class Region_Class:
         # Calculate the stress metric based on available chargers and queue size
         ALFA = 1
         self.stress_metric = 1 - (self.available_chargers / self.chargers ) + ALFA * (self.queue.qsize() / self.chargers)
+        
+    def run(self, step):
+        if step % 5 == 0:
+            self.update()
+        self.charger_history.append(self.available_chargers)
+        self.queue_history.append(self.queue.qsize())
+        
+    def save_history(self):
+        history = {
+            "chargers": self.charger_history,
+            "queue": self.queue_history
+        }
+        with open('logs/' + self.id + '.json', 'w') as f:
+            json.dump(history, f)
