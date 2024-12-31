@@ -173,7 +173,7 @@ class Car_Class:
     def run(self, rush_hour):
         if self.displayed:
             self.logger.log(f"{self.id} {self.state}")
-        
+        self.home_region.update_autonomy((self.autonomy / self.full_autonomy) * 100)
         if self.state == IDLE:
             self.idle(rush_hour)
         elif self.state == TRAVELING:

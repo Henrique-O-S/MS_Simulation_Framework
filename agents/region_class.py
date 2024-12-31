@@ -17,17 +17,21 @@ class Region_Class:
         self.chargers = chargers
         self.traffic = traffic
         self.available_chargers = chargers
+        self.total_cars = 0
+        self.total_autonomy = 0
         self.queue = queue.Queue()
         self.queued_cars = 0
         self.cars_charged = 0
         self.stress_metric = 0
         self.average_wait_time = 0
+        self.average_autonomy = 0
         self.logger = Logger(filename=str(id))
         
-        # results
+        # metrics
         self.charger_history = []
         self.queue_history = []
         self.wait_history = []
+        self.autonomy_history = []
 
     def stop_charging(self):
         self.available_chargers += 1
@@ -66,18 +70,27 @@ class Region_Class:
         self.queued_cars += 1
         self.average_wait_time = (self.average_wait_time * (self.queued_cars - 1) + wait_time) / self.queued_cars
         
+    def update_autonomy(self, autonomy):
+        self.total_autonomy += autonomy
+        
     def run(self, step):
         if step % 5 == 0:
             self.update()
+            
+        self.average_autonomy = self.total_autonomy / self.total_cars
+        self.total_autonomy = 0
+            
         self.charger_history.append(self.available_chargers)
-        self.queue_history.append(self.queue.qsize() / self.chargers)
-        self.wait_history.append(self.average_wait_time)
+        self.queue_history.append(round(self.queue.qsize() / self.chargers, 2))
+        self.wait_history.append(round(self.average_wait_time, 2))
+        self.autonomy_history.append(round(self.average_autonomy, 2))
         
     def save_history(self):
         history = {
             "chargers": self.charger_history,
             "queue": self.queue_history,
-            "wait": self.wait_history
+            "wait": self.wait_history,
+            "autonomy": self.autonomy_history
         }
         with open('logs/' + self.id + '.json', 'w') as f:
             json.dump(history, f)
