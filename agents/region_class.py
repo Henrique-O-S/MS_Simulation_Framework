@@ -18,13 +18,16 @@ class Region_Class:
         self.traffic = traffic
         self.available_chargers = chargers
         self.queue = queue.Queue()
+        self.queued_cars = 0
         self.cars_charged = 0
         self.stress_metric = 0
+        self.average_wait_time = 0
         self.logger = Logger(filename=str(id))
         
         # results
         self.charger_history = []
         self.queue_history = []
+        self.wait_history = []
 
     def stop_charging(self):
         self.available_chargers += 1
@@ -35,8 +38,8 @@ class Region_Class:
         self.logger.log("")
         if not self.queue.empty():
             next_car = self.queue.get()
+            next_car.exit_queue()
             self.start_charging(next_car)
-            next_car.state = CHARGING # Notifies the next car that it has started charging. Avoids waiting for the next step to start charging.
 
     def start_charging(self, car):
         if self.available_chargers > 0:
@@ -56,20 +59,25 @@ class Region_Class:
         return self.available_chargers, self.queue.qsize()
     
     def update(self):
-        # Calculate the stress metric based on available chargers and queue size
         ALFA = 1
         self.stress_metric = 1 - (self.available_chargers / self.chargers ) + ALFA * (self.queue.qsize() / self.chargers)
+        
+    def update_wait_time(self, wait_time):
+        self.queued_cars += 1
+        self.average_wait_time = (self.average_wait_time * (self.queued_cars - 1) + wait_time) / self.queued_cars
         
     def run(self, step):
         if step % 5 == 0:
             self.update()
         self.charger_history.append(self.available_chargers)
-        self.queue_history.append(self.queue.qsize())
+        self.queue_history.append(self.queue.qsize() / self.chargers)
+        self.wait_history.append(self.average_wait_time)
         
     def save_history(self):
         history = {
             "chargers": self.charger_history,
-            "queue": self.queue_history
+            "queue": self.queue_history,
+            "wait": self.wait_history
         }
         with open('logs/' + self.id + '.json', 'w') as f:
             json.dump(history, f)

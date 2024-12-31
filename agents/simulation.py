@@ -24,7 +24,6 @@ class SimulationVisualization:
             selected_cars = get_random_cars(cars, name)
             for car in selected_cars:
                 car.displayed = True
-                print(car.id, car.displayed)
             self.displayed_cars.extend(selected_cars)
 
     def update_visualization(self):
@@ -54,7 +53,7 @@ class Simulation:
 
     def run_step(self, step):
         for car in self.cars:
-            car.run(step, self.rush_hour)
+            car.run(self.rush_hour)
             
         for region in self.regions:
             region.run(step)

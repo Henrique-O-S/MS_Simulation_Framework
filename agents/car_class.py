@@ -27,11 +27,13 @@ class Car_Class:
         self.latitude = current_region.latitude
         self.longitude = current_region.longitude
         self.distance_travelled = 0
+        self.wait_time = 0
         self.regions = regions
         self.next_region = None
         self.charge_at_destination = False
         self.stuck_at_region = False
         self.state = IDLE
+        self.displayed = False
         self.logger = Logger(filename="cars")
 
     def get_battery_percentage(self):
@@ -139,25 +141,21 @@ class Car_Class:
 # ---------------------------------------------------------------------------------------------------------------
                     
     def before_charging(self):
-        if self.stuck_at_region:
-            if self.current_region.start_charging(self):
-                    self.stuck_at_region = False
-                    self.state = CHARGING
-            else:
-                self.state = IN_QUEUE
-                pass
+        if self.current_region.start_charging(self):
+            self.stuck_at_region = False
+            self.state = CHARGING
         else:
-            if self.current_region.start_charging(self):
-                    self.stuck_at_region = False
-                    self.state = CHARGING
-            else:
-                self.state = IN_QUEUE
-                pass
+            self.state = IN_QUEUE
             
 # ---------------------------------------------------------------------------------------------------------------
 
     def in_queue(self):
-        pass
+        self.wait_time += 1
+        
+    def exit_queue(self):
+        self.current_region.update_wait_time(self.wait_time)
+        self.wait_time = 0
+        self.state = CHARGING
     
 # ---------------------------------------------------------------------------------------------------------------
     
@@ -172,12 +170,9 @@ class Car_Class:
             
 # ---------------------------------------------------------------------------------------------------------------
 
-    def run(self, step, rush_hour):
-        car_number = int(self.id.split("_")[-1])
-        if self.id.startswith("aldoar_low_end") and car_number in range(10):
+    def run(self, rush_hour):
+        if self.displayed:
             self.logger.log(f"{self.id} {self.state}")
-            if car_number == 9:
-                self.logger.log("")
         
         if self.state == IDLE:
             self.idle(rush_hour)
