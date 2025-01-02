@@ -14,7 +14,7 @@ class SimulationVisualization:
         self.select_cars_for_display(cars)
         
     def select_cars_for_display(self, cars):
-        def get_random_cars(cars, prefix, count=5):
+        def get_random_cars(cars, prefix, count=2):
             filtered_cars = [car for car in cars if car.id.startswith(prefix)]
             return random.sample(filtered_cars, min(len(filtered_cars), count))
         
