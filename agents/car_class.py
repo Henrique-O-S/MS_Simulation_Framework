@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv, dotenv_values
 from aux_funcs import haversine_distance, calculate_angle, region_distances
-from math import sin, cos, radians
+from math import sin, cos, radians, ceil
 from log import Logger
 
 load_dotenv()
@@ -34,6 +34,9 @@ class Car_Class:
         self.state = IDLE
         self.displayed = False
         self.logger = Logger(filename="cars")
+        self.stepsToTravel = 0
+        self.currentTripSteps = 0
+        self.distanceToTravel = 0
 
     def get_battery_percentage(self):
         return self.autonomy / self.full_autonomy
@@ -89,30 +92,58 @@ class Car_Class:
 # ---------------------------------------------------------------------------------------------------------------
                         
     def traveling(self):
-        angle = calculate_angle(
-            (self.latitude, self.longitude), (self.next_region.latitude, self.next_region.longitude))
-        next_lat, next_long = self.next_pos(angle)
-        future_movement = haversine_distance(
-            self.latitude, self.longitude, next_lat, next_long)
-        distance = haversine_distance(
-            self.latitude, self.longitude, self.next_region.latitude, self.next_region.longitude)
-        
-        if future_movement >= distance:
-            self.latitude = self.next_region.latitude
-            self.longitude = self.next_region.longitude
-            self.autonomy -= distance
-            self.distance_travelled += distance
-            self.arrived_at_destination()
-            if self.charge_at_destination:
-                self.charge_at_destination = False
-                self.state = BEFORE_CHARGING
+        if(self.displayed):
+            angle = calculate_angle(
+                (self.latitude, self.longitude), (self.next_region.latitude, self.next_region.longitude))
+            next_lat, next_long = self.next_pos(angle)
+            future_movement = haversine_distance(
+                self.latitude, self.longitude, next_lat, next_long)
+            distance = haversine_distance(
+                self.latitude, self.longitude, self.next_region.latitude, self.next_region.longitude)
+            
+            if future_movement >= distance:
+                self.latitude = self.next_region.latitude
+                self.longitude = self.next_region.longitude
+                self.autonomy -= distance
+                self.distance_travelled += distance
+                self.arrived_at_destination()
+                if self.charge_at_destination:
+                    self.charge_at_destination = False
+                    self.state = BEFORE_CHARGING
+                else:
+                    self.state = IDLE
             else:
-                self.state = IDLE
+                self.latitude = next_lat
+                self.longitude = next_long
+                self.autonomy -= future_movement
+                self.distance_travelled += future_movement
+
+
+        elif(self.stepsToTravel == 0):
+            #calculate number of steps to reach destination
+            angle = calculate_angle(
+                (self.latitude, self.longitude), (self.next_region.latitude, self.next_region.longitude))
+            next_lat, next_long = self.next_pos(angle)
+            future_movement = haversine_distance(
+                self.latitude, self.longitude, next_lat, next_long)
+            self.distanceToTravel = haversine_distance(
+                self.latitude, self.longitude, self.next_region.latitude, self.next_region.longitude)
+            self.stepsToTravel = ceil(self.distanceToTravel / future_movement)
         else:
-            self.latitude = next_lat
-            self.longitude = next_long
-            self.autonomy -= future_movement
-            self.distance_travelled += future_movement
+            self.currentTripSteps += 1
+            if self.currentTripSteps >= self.stepsToTravel:
+                self.latitude = self.next_region.latitude
+                self.longitude = self.next_region.longitude
+                self.autonomy -= self.distanceToTravel
+                self.distance_travelled += self.distanceToTravel
+                self.arrived_at_destination()
+                if self.charge_at_destination:
+                    self.charge_at_destination = False
+                    self.state = BEFORE_CHARGING
+                else:
+                    self.state = IDLE
+                self.stepsToTravel = 0
+                self.currentTripSteps = 0
             
 # ---------------------------------------------------------------------------------------------------------------
             
