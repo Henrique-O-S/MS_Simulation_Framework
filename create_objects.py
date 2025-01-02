@@ -15,7 +15,6 @@ from agents.simulation import Simulation
 from agents.car_class import Car_Class
 from agents.region_class import Region_Class
 
-
 load_dotenv()
 
 class Application:
@@ -53,7 +52,7 @@ class Application:
                 driving_perc = float(driving_perc.replace(",", "."))
                 avg_m_inc = float(avg_m_inc.replace(",", "."))
                 chargers = int(chargers)
-                traffic = int(traffic)
+                traffic = float(traffic)
                 regions.append(Region(region_id, latitude, longitude, int(avg_pop * driving_perc), avg_m_inc, chargers, traffic))
 
     def read_car_csv(self, filename, cars):
@@ -78,7 +77,6 @@ class Application:
         if os.path.exists(car_file):
             self.read_car_csv(car_file, car_models)
 
-
         region_objects = []
         for region in regions:
             region_objects.append(Region_Class(
@@ -93,6 +91,7 @@ class Application:
                     id = region.id + '_' + car_model.id + '_' + str(i)
                     car = Car_Class(id, car_model.autonomy, int(os.getenv("CAR_VELOCITY")), region, region_objects)
                     car_objects.append(car)
+            region.total_cars = sum(cars_data[region.id].values())
 
         #THIS IS FOR TESTING
         '''car_objects.append(Car_Class(

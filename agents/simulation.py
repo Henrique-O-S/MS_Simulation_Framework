@@ -51,9 +51,12 @@ class Simulation:
         self.running = True
         self.rush_hour = False
 
-    def run_step(self):
+    def run_step(self, step):
         for car in self.cars:
             car.run(self.rush_hour)
+            
+        for region in self.regions:
+            region.run(step)
 
         # Update visualization
         self.visualization.update_visualization()
@@ -76,9 +79,9 @@ class Simulation:
                 self.rush_hour = True
             else:
                 self.rush_hour = False
-            self.run_step()
-            if step % 5 == 0:
-                for region in self.regions:
-                    region.update()
+            self.run_step(step)
 
             time.sleep(1 / 60)  # Simulate 60Hz updates
+            
+        for region in self.regions:
+            region.save_history()
