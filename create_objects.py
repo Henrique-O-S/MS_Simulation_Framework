@@ -52,7 +52,7 @@ class Application:
                 driving_perc = float(driving_perc.replace(",", "."))
                 avg_m_inc = float(avg_m_inc.replace(",", "."))
                 chargers = int(chargers)
-                traffic = int(traffic)
+                traffic = float(traffic)
                 regions.append(Region(region_id, latitude, longitude, int(avg_pop * driving_perc), avg_m_inc, chargers, traffic))
 
     def read_car_csv(self, filename, cars):
