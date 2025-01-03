@@ -45,11 +45,14 @@ class Car:
         self.currentTripSteps = 0
         self.distanceToTravel = 0
         self.logger = Logger(filename="cars")
+        self.availabilityWeigh = float(os.getenv("AVAILABILITY_WEIGHT"))
+        self.distanceWeight = float(os.getenv("DISTANCE_WEIGHT"))
+        self.queueWeigh = float(os.getenv("QUEUE_WEIGHT"))
         
     # ---------------------------------------------------------------------------------------------------------
 
     def get_battery_percentage(self):
-        return self.autonomy / self.full_autonomy
+        return (self.autonomy / self.full_autonomy) * 100
     
     # ---------------------------------------------------------------------------------------------------------
     
@@ -175,7 +178,7 @@ class Car:
             region, (chargers, queue_size) = response
             distance = region_distances[self.current_region.id][region.id]
             distance += 0.1
-            return float(os.getenv("DISTANCE_WEIGHT")) * (1 / distance) + float(os.getenv("AVAILABILITY_WEIGHT")) * chargers - float(os.getenv("QUEUE_WEIGHT")) * queue_size
+            return self.distanceWeight * (1 / distance) + self.availabilityWeigh * chargers - self.queueWeigh * queue_size
         responses.sort(key=score, reverse=True)
         charging_region = responses[0][0] if responses else None
         if self.current_region.id == charging_region.id:
@@ -219,6 +222,19 @@ class Car:
         else:
             charging_rate = float(os.getenv("CHARGING_PER_STEP_HOME")) if at_home else float(os.getenv("CHARGING_PER_STEP"))
             self.autonomy += charging_rate
+
+            if random.random() < self.stop_charging_probability():
+                print("Car stopped charging early")
+                if not at_home:
+                    self.current_region.stop_charging()
+                self.state = IDLE         
+
+    def stop_charging_probability(self):
+        battery_perc = self.get_battery_percentage()
+        if battery_perc < 50:
+            return 0
+        else:
+            return (battery_perc - 50) / 1000  # Linearly increase from 0 to 5% probability 
             
     # ---------------------------------------------------------------------------------------------------------
 
