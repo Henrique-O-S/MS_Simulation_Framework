@@ -51,8 +51,6 @@ class Simulation:
             self.checkRushHour(step)
             self.run_step(step)
             time.sleep(1 / 60) 
-        for region in self.regions:
-            region.save_history()
             
 # -------------------------------------------------------------------------------------------------------------
 

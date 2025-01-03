@@ -96,6 +96,8 @@ class Region:
     def run(self, step):
         if step % 5 == 0:
             self.update()
+
+        self.save_history()
         self.average_autonomy = self.total_autonomy / self.total_cars
         self.total_autonomy = 0
         self.charger_history.append(self.available_chargers)
