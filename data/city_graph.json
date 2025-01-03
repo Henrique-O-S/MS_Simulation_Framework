@@ -9,21 +9,21 @@
         "campanha"
     ],
     "edges": [
-        ["aldoar", "ramalde", 1],
+        ["aldoar", "ramalde", 2],
         ["aldoar", "lordelo", 1],
 
-        ["ramalde", "lordelo", 3],
-        ["ramalde", "paranhos", 3],
-        ["ramalde", "centro", 3],
+        ["ramalde", "lordelo", 4],
+        ["ramalde", "paranhos", 4],
+        ["ramalde", "centro", 5],
 
-        ["lordelo", "centro", 3],
+        ["lordelo", "centro", 5],
 
-        ["paranhos", "centro", 3],
-        ["paranhos", "bonfim", 1],
-        ["paranhos", "campanha", 2],
+        ["paranhos", "centro", 5],
+        ["paranhos", "bonfim", 2],
+        ["paranhos", "campanha", 3],
 
-        ["centro", "bonfim", 2],
+        ["centro", "bonfim", 3],
         
-        ["bonfim", "campanha", 1]
+        ["bonfim", "campanha", 2]
     ]
 }
