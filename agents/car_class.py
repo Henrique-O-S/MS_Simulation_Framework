@@ -197,14 +197,16 @@ class Car_Class:
                 self.current_region.stop_charging()
             self.state = IDLE
         else:
-            self.autonomy += float(os.getenv("CHARGING_PER_STEP"))
+            charging_rate = float(os.getenv("CHARGING_PER_STEP_HOME")) if at_home else float(os.getenv("CHARGING_PER_STEP"))
+            # charging_rate = float(os.getenv("CHARGING_PER_STEP"))
+            self.autonomy += charging_rate
             
 # ---------------------------------------------------------------------------------------------------------------
 
     def run(self, rush_hour):
         if self.displayed:
             self.logger.log(f"{self.id} {self.state}")
-        self.home_region.update_autonomy((self.autonomy / self.full_autonomy) * 100)
+        self.home_region.update_autonomy(self.get_battery_percentage() * 100)
         if self.state == IDLE:
             self.idle(rush_hour)
         elif self.state == TRAVELING:

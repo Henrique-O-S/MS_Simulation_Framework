@@ -8,7 +8,7 @@ class Region:
         self.chargers = int(chargers)
         self.available_chargers = chargers
         self.carsCharged = 0
-        self.traffic = float(traffic)
+        self.traffic = int(traffic)
     
     def _get_available_chargers(self):
         return self.available_chargers
