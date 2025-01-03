@@ -1,7 +1,11 @@
+# -------------------------------------------------------------------------------------------------------------
+
 import queue
 import json
 
-from log import Logger
+from logs.log import Logger
+
+# -------------------------------------------------------------------------------------------------------------
 
 TRAVELING = "[Traveling]"
 IDLE = "[Idle]"
@@ -9,11 +13,15 @@ CHARGING = "[Charging]"
 BEFORE_CHARGING = "[BeforeCharging]"
 DECIDE_CHARGING = "[DecideCharging]"
 
-class Region_Class:
-    def __init__(self, id, latitude, longitude, chargers, traffic):
+# -------------------------------------------------------------------------------------------------------------
+
+class Region:
+    def __init__(self, id, latitude, longitude, avg_drivers, avg_income, chargers, traffic):
         self.id = id
         self.latitude = latitude
         self.longitude = longitude
+        self.avg_drivers = int(avg_drivers)
+        self.avg_income = int(avg_income)
         self.chargers = chargers
         self.traffic = traffic
         self.available_chargers = chargers
@@ -26,12 +34,12 @@ class Region_Class:
         self.average_wait_time = 0
         self.average_autonomy = 0
         self.logger = Logger(filename=str(id))
-        
-        # metrics
         self.charger_history = []
         self.queue_history = []
         self.wait_history = []
         self.autonomy_history = []
+        
+    # ---------------------------------------------------------------------------------------------------------
 
     def stop_charging(self):
         self.available_chargers += 1
@@ -44,6 +52,8 @@ class Region_Class:
             next_car = self.queue.get()
             next_car.exit_queue()
             self.start_charging(next_car)
+            
+    # ---------------------------------------------------------------------------------------------------------
 
     def start_charging(self, car):
         if self.available_chargers > 0:
@@ -58,32 +68,42 @@ class Region_Class:
             self.logger.log("Queue size: " + str(self.queue.qsize()))
             self.logger.log("")
             return False
+        
+    # ---------------------------------------------------------------------------------------------------------
 
     def get_status(self):
         return self.available_chargers, self.queue.qsize()
+    
+    # ---------------------------------------------------------------------------------------------------------
     
     def update(self):
         ALFA = 1
         self.stress_metric = 1 - (self.available_chargers / self.chargers ) + ALFA * (self.queue.qsize() / self.chargers)
         
+    # ---------------------------------------------------------------------------------------------------------
+        
     def update_wait_time(self, wait_time):
         self.queued_cars += 1
         self.average_wait_time = (self.average_wait_time * (self.queued_cars - 1) + wait_time) / self.queued_cars
         
+    # ---------------------------------------------------------------------------------------------------------
+        
     def update_autonomy(self, autonomy):
         self.total_autonomy += autonomy
+        
+    # ---------------------------------------------------------------------------------------------------------
         
     def run(self, step):
         if step % 5 == 0:
             self.update()
-            
         self.average_autonomy = self.total_autonomy / self.total_cars
         self.total_autonomy = 0
-            
         self.charger_history.append(self.available_chargers)
         self.queue_history.append(round(self.queue.qsize() / self.chargers, 2))
         self.wait_history.append(round(self.average_wait_time, 2))
         self.autonomy_history.append(round(self.average_autonomy, 2))
+        
+    # ---------------------------------------------------------------------------------------------------------
         
     def save_history(self):
         history = {
@@ -92,5 +112,7 @@ class Region_Class:
             "wait": self.wait_history,
             "autonomy": self.autonomy_history
         }
-        with open('logs/' + self.id + '.json', 'w') as f:
+        with open('logs/outputs/' + self.id + '.json', 'w') as f:
             json.dump(history, f)
+
+# -------------------------------------------------------------------------------------------------------------

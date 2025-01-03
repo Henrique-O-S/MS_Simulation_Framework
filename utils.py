@@ -1,5 +1,8 @@
+# -------------------------------------------------------------------------------------------------------------
+
 from math import radians, sin, cos, sqrt, atan2
-import networkx as nx
+
+# -------------------------------------------------------------------------------------------------------------
 
 def extract_numeric_value(value_str):
     """
@@ -14,6 +17,7 @@ def extract_numeric_value(value_str):
             break
     return float(numeric_part) if numeric_part else None
 
+# -------------------------------------------------------------------------------------------------------------
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     """
@@ -29,18 +33,16 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     Returns:
     float: Distance between the two points in kilometers.
     """
-    # Convert latitude and longitude from degrees to radians
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
-
-    # Haversine formula
     dlon = lon2 - lon1
     dlat = lat2 - lat1
     a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    radius_earth = 6371  # Radius of the Earth in kilometers
+    radius_earth = 6371
     distance = radius_earth * c
-
     return distance
+
+# -------------------------------------------------------------------------------------------------------------
 
 region_distances = {
     "aldoar": {
@@ -108,6 +110,7 @@ region_distances = {
     }
 }
 
+# -------------------------------------------------------------------------------------------------------------
 
 def calculate_angle(pos1, pos2):
     """
@@ -117,6 +120,7 @@ def calculate_angle(pos1, pos2):
     lat2, lon2 = pos2
     return atan2(lat2 - lat1, lon2 - lon1)
 
+# -------------------------------------------------------------------------------------------------------------
 
 def stepsToTime(step, steps_per_day):
     """
@@ -125,3 +129,5 @@ def stepsToTime(step, steps_per_day):
     hours = step // (steps_per_day // 24)
     minutes = (step % (steps_per_day // 24)) * 60 // (steps_per_day // 24)
     return f"{hours:02d} : {minutes:02d} h"
+
+# -------------------------------------------------------------------------------------------------------------

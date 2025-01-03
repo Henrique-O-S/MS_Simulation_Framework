@@ -1,10 +1,15 @@
+# -------------------------------------------------------------------------------------------------------------
+
 import random
 import os
 
-from dotenv import load_dotenv, dotenv_values
-from aux_funcs import haversine_distance, calculate_angle, region_distances
 from math import sin, cos, radians, ceil
-from log import Logger
+
+from utils import haversine_distance, calculate_angle, region_distances
+from logs.log import Logger
+from dotenv import load_dotenv
+
+# -------------------------------------------------------------------------------------------------------------
 
 load_dotenv()
 
@@ -16,7 +21,9 @@ DECIDE_CHARGING = "[DecideCharging]"
 CHARGING_AT_HOME = "[ChargingAtHome]"
 IN_QUEUE = "[InQueue]"
 
-class Car_Class:
+# -------------------------------------------------------------------------------------------------------------
+
+class Car:
     def __init__(self, id, autonomy, velocity, current_region, regions):
         self.id = id
         self.full_autonomy = autonomy
@@ -34,20 +41,28 @@ class Car_Class:
         self.stuck_at_region = False
         self.state = IDLE
         self.displayed = False
-        self.logger = Logger(filename="cars")
         self.stepsToTravel = 0
         self.currentTripSteps = 0
         self.distanceToTravel = 0
+        self.logger = Logger(filename="cars")
+        
+    # ---------------------------------------------------------------------------------------------------------
 
     def get_battery_percentage(self):
         return self.autonomy / self.full_autonomy
     
+    # ---------------------------------------------------------------------------------------------------------
+    
     def arrived_at_destination(self):
         self.current_region = self.next_region
         self.next_region = None
+        
+    # ---------------------------------------------------------------------------------------------------------
 
     def reachable_regions(self):
         return [region for region in self.regions if region_distances[self.current_region.id][region.id] < self.autonomy]
+    
+    # ---------------------------------------------------------------------------------------------------------
 
     def pick_next_region(self):
         valid_regions = [region for region in self.reachable_regions() if region != self.current_region]
@@ -55,16 +70,20 @@ class Car_Class:
             return None
         traffic = [region.traffic if region != self.home_region else 30 for region in valid_regions]
         return random.choices(valid_regions, weights=traffic, k=1)[0]
+    
+    # ---------------------------------------------------------------------------------------------------------
 
     def next_pos(self, angle):
         new_latitude = self.latitude + self.velocity * sin(angle) / 111.2
         new_longitude = self.longitude + self.velocity * cos(angle) / (111.2 * cos(radians(self.latitude)))
         return new_latitude, new_longitude
+    
+    # ---------------------------------------------------------------------------------------------------------
 
     def charge(self):
         self.autonomy = self.full_autonomy
         
-# ---------------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------
 
     def idle(self, rush_hour):
         if self.get_battery_percentage() < float(os.getenv("AUTONOMY_TOLERANCE")):
@@ -74,12 +93,16 @@ class Car_Class:
             if random.random() >= idle_probability:
                 self.consider_traveling()
 
+    # ---------------------------------------------------------------------------------------------------------
+
     def consider_charging(self):
         if random.random() < float(os.getenv("PROBABILITY_OF_CHARGING")):
             if self.current_region == self.home_region and random.random() < float(os.getenv("PROBABILITY_OF_CHARGING_AT_HOME")):
                 self.state = CHARGING_AT_HOME
             else:
                 self.state = DECIDE_CHARGING
+                
+    # ---------------------------------------------------------------------------------------------------------
 
     def consider_traveling(self):
         next_region = self.pick_next_region()
@@ -90,7 +113,7 @@ class Car_Class:
             self.stuckAtRegion = True
             self.state = BEFORE_CHARGING
                     
-# ---------------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------
                         
     def traveling(self):
         if(self.displayed):
@@ -118,10 +141,7 @@ class Car_Class:
                 self.longitude = next_long
                 self.autonomy -= future_movement
                 self.distance_travelled += future_movement
-
-
-        elif(self.stepsToTravel == 0):
-            #calculate number of steps to reach destination
+        elif (self.stepsToTravel == 0):
             angle = calculate_angle(
                 (self.latitude, self.longitude), (self.next_region.latitude, self.next_region.longitude))
             next_lat, next_long = self.next_pos(angle)
@@ -146,18 +166,16 @@ class Car_Class:
                 self.stepsToTravel = 0
                 self.currentTripSteps = 0
             
-# ---------------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------
             
     def decide_charging(self):
         reachable_regions = self.reachable_regions()
         responses = [(region, region.get_status()) for region in reachable_regions]
-        
         def score(response):
             region, (chargers, queue_size) = response
             distance = region_distances[self.current_region.id][region.id]
             distance += 0.1
             return float(os.getenv("DISTANCE_WEIGHT")) * (1 / distance) + float(os.getenv("AVAILABILITY_WEIGHT")) * chargers - float(os.getenv("QUEUE_WEIGHT")) * queue_size
-        
         responses.sort(key=score, reverse=True)
         charging_region = responses[0][0] if responses else None
         if self.current_region.id == charging_region.id:
@@ -169,7 +187,7 @@ class Car_Class:
                     self.next_region = region
                     self.state = TRAVELING
                     
-# ---------------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------
                     
     def before_charging(self):
         if self.current_region.start_charging(self):
@@ -178,17 +196,19 @@ class Car_Class:
         else:
             self.state = IN_QUEUE
             
-# ---------------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------
 
     def in_queue(self):
         self.wait_time += 1
+        
+    # ---------------------------------------------------------------------------------------------------------
         
     def exit_queue(self):
         self.current_region.update_wait_time(self.wait_time)
         self.wait_time = 0
         self.state = CHARGING
     
-# ---------------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------
     
     def charging(self, at_home=False):
         if self.autonomy >= self.full_autonomy:
@@ -198,10 +218,9 @@ class Car_Class:
             self.state = IDLE
         else:
             charging_rate = float(os.getenv("CHARGING_PER_STEP_HOME")) if at_home else float(os.getenv("CHARGING_PER_STEP"))
-            # charging_rate = float(os.getenv("CHARGING_PER_STEP"))
             self.autonomy += charging_rate
             
-# ---------------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------
 
     def run(self, rush_hour):
         if self.displayed:
@@ -222,4 +241,4 @@ class Car_Class:
         elif self.state == CHARGING_AT_HOME:
             self.charging(at_home=True)
             
-# ---------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------
