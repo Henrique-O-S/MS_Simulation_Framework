@@ -130,4 +130,11 @@ def stepsToTime(step, steps_per_day):
     minutes = (step % (steps_per_day // 24)) * 60 // (steps_per_day // 24)
     return f"{hours:02d} : {minutes:02d} h"
 
+
+def isBetweenHours(hour, hour2, step, steps_per_day):
+    """
+    Check if the current time is between the specified time.
+    """
+    return step % steps_per_day >= steps_per_day * hour / 24 and step % steps_per_day <= steps_per_day * hour2 / 24
+
 # -------------------------------------------------------------------------------------------------------------

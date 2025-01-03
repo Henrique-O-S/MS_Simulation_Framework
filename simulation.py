@@ -4,7 +4,7 @@ import time
 import os
 import random
 
-from utils import stepsToTime
+from utils import stepsToTime, isBetweenHours
 
 # -------------------------------------------------------------------------------------------------------------
 
@@ -37,7 +37,7 @@ class Simulation:
     # ---------------------------------------------------------------------------------------------------------
     
     def checkRushHour(self, step):
-        if (step % self.steps_per_day >= self.steps_per_day * 7.5 / 24 and step % self.steps_per_day <= self.steps_per_day * 9 / 24) or (step % self.steps_per_day >= self.steps_per_day * 17 / 24 and step % self.steps_per_day <= self.steps_per_day * 19 / 24):
+        if (isBetweenHours(7.5, 9, step, self.steps_per_day) or isBetweenHours(17, 19, step, self.steps_per_day)):
             self.rush_hour = True
         else:
             self.rush_hour = False
