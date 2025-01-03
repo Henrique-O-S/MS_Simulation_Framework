@@ -6,9 +6,32 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        #clock-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #clock {
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        #warning {
+            font-size: 28px;
+            font-weight: bold;
+            color: red;
+            display: none; /* Initially hidden */
+        }
+    </style>
 </head>
 
 <body>
+    <div id="clock-container">
+        <div id="clock">00:00:00</div>
+        <div id="warning">Rush Hour!</div>
+    </div>
     <div id="map" style="height: 700px;"></div>
 
     <script>
@@ -56,6 +79,17 @@
 
         // Listen for the 'map_updated' event
         socket.on('map_updated', function (data) {
+            // Update the clock with the time from data.time
+            document.getElementById('clock').innerText = data.time;
+            console.log(data.time);
+
+            // Show or hide the rush hour warning
+            if (data.rush_hour) {
+                document.getElementById('warning').style.display = 'block';
+            } else {
+                document.getElementById('warning').style.display = 'none';
+            }
+
             // Update each set of coordinates
             data.region_data.forEach(function (region) {
                 // If a marker for this name already exists and its position has changed, update its position
@@ -101,6 +135,7 @@
                     markers[car.name] = marker;
                 }
             });
+
         });
     </script>
 </body>

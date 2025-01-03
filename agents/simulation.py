@@ -4,6 +4,7 @@ import os
 import random
 from flask import Flask
 from flask_socketio import SocketIO
+from aux_funcs import stepsToTime
 
 
 class SimulationVisualization:
@@ -12,6 +13,7 @@ class SimulationVisualization:
         self.socketio = socketio
         self.regions = regions
         self.select_cars_for_display(cars)
+        self.steps_per_day = int(os.getenv("STEPS_PER_DAY"))
         
     def select_cars_for_display(self, cars):
         def get_random_cars(cars, prefix, count=2):
@@ -26,7 +28,7 @@ class SimulationVisualization:
                 car.displayed = True
             self.displayed_cars.extend(selected_cars)
 
-    def update_visualization(self):
+    def update_visualization(self, step, rush_hour):
         regions_data = [
             {'name': region.id, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged, 'stress_metric': region.stress_metric}
             for region in self.regions
@@ -35,7 +37,7 @@ class SimulationVisualization:
             {'name': car.id, 'lat': car.latitude, 'lng': car.longitude}
             for car in self.displayed_cars
         ]
-        self.socketio.emit('map_updated', {'region_data': regions_data, 'car_data': cars_data})
+        self.socketio.emit('map_updated', {'region_data': regions_data, 'car_data': cars_data, 'time': stepsToTime(step, self.steps_per_day), 'rush_hour': rush_hour})
 
     def signal_end(self):
         self.socketio.emit('simulation_end', {})
@@ -50,6 +52,7 @@ class Simulation:
         self.visualization = SimulationVisualization(app, socketio, regions, cars)
         self.running = True
         self.rush_hour = False
+        self.steps_per_day = int(os.getenv("STEPS_PER_DAY"))
 
     def run_step(self, step):
         for car in self.cars:
@@ -59,7 +62,7 @@ class Simulation:
             region.run(step)
 
         # Update visualization
-        self.visualization.update_visualization()
+        self.visualization.update_visualization(step, self.rush_hour)
 
         # Check end conditions (e.g., all cars idle, no regions active, etc.)
         if self.check_simulation_end():
@@ -69,16 +72,20 @@ class Simulation:
     def check_simulation_end(self):
         # Placeholder for simulation end conditions
         return False
+    
+    def checkRushHour(self, step):
+        if (step % self.steps_per_day >= self.steps_per_day * 7.5 / 24 and step % self.steps_per_day <= self.steps_per_day * 9 / 24) or (step % self.steps_per_day >= self.steps_per_day * 17 / 24 and step % self.steps_per_day <= self.steps_per_day * 19 / 24):
+            self.rush_hour = True
+        else:
+            self.rush_hour = False
 
     def run(self, steps):
         for step in range(steps):
-            print(f"Step {step}")
             if not self.running:
                 break
-            if (step % int(os.getenv("STEPS_PER_DAY")) >= int(os.getenv("STEPS_PER_DAY")) * 7.5 / 24 and step % int(os.getenv("STEPS_PER_DAY")) <= int(os.getenv("STEPS_PER_DAY")) * 9 / 24) or (step % int(os.getenv("STEPS_PER_DAY")) >= int(os.getenv("STEPS_PER_DAY")) * 17 / 24 and step % int(os.getenv("STEPS_PER_DAY")) <= int(os.getenv("STEPS_PER_DAY")) * 19 / 24):
-                self.rush_hour = True
-            else:
-                self.rush_hour = False
+
+            self.checkRushHour(step)
+
             self.run_step(step)
 
             time.sleep(1 / 60)  # Simulate 60Hz updates
