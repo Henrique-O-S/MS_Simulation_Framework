@@ -82,14 +82,32 @@ class SimulationVisualization:
 
     def update_visualization(self, step, rush_hour):
         regions_data = [
-            {'name': region.id, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged, 'stress_metric': region.stress_metric}
+            {
+                'name': region.id,
+                'lat': region.latitude,
+                'lng': region.longitude,
+                'cars_charged': region.cars_charged,
+                'stress_metric': region.stress_metric
+            }
             for region in self.regions
         ]
         cars_data = [
-            {'name': car.id, 'lat': car.latitude, 'lng': car.longitude}
+            {
+                'name': car.id,
+                'lat': car.latitude,
+                'lng': car.longitude
+            }
             for car in self.displayed_cars
         ]
-        self.socketio.emit('map_updated', {'region_data': regions_data, 'car_data': cars_data, 'time': stepsToTime(step, self.steps_per_day), 'rush_hour': rush_hour})
+        self.socketio.emit(
+            'map_updated',
+            {
+                'region_data': regions_data,
+                'car_data': cars_data,
+                'time': stepsToTime(step, self.steps_per_day),
+                'rush_hour': rush_hour
+            }
+        )
 
     # ---------------------------------------------------------------------------------------------------------
 

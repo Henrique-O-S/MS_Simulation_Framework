@@ -6,25 +6,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
-    <style>
-        #clock-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        #clock {
-            font-size: 24px;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        #warning {
-            font-size: 28px;
-            font-weight: bold;
-            color: red;
-            display: none; /* Initially hidden */
-        }
-    </style>
+    <link rel="stylesheet" href="static/style.css" />
 </head>
 
 <body>
@@ -32,7 +14,66 @@
         <div id="clock">00:00:00</div>
         <div id="warning">Rush Hour!</div>
     </div>
-    <div id="map" style="height: 700px;"></div>
+    <div id="map" style="height: 700px;">
+        <table id="metrics">
+            <tr>
+                <th></th>
+                <th>Chargers</th>
+                <th>Queue</th>
+                <th>Wait</th>
+                <th>Battery</th>
+            </tr>
+            <tr>
+                <th>Aldoar</th>
+                <td id="aldoar_chargers">0</td>
+                <td id="aldoar_queue">0</td>
+                <td id="aldoar_wait">0</td>
+                <td id="aldoar_battery">0</td>
+            </tr>
+            <tr>
+                <th>Ramalde</th>
+                <td id="ramalde_chargers">0</td>
+                <td id="ramalde_queue">0</td>
+                <td id="ramalde_wait">0</td>
+                <td id="ramalde_battery">0</td>
+            </tr>
+            <tr>
+                <th>Paranhos</th>
+                <td id="paranhos_chargers">0</td>
+                <td id="paranhos_queue">0</td>
+                <td id="paranhos_wait">0</td>
+                <td id="paranhos_battery">0</td>
+            </tr>
+            <tr>
+                <th>Lordelo</th>
+                <td id="lordelo_chargers">0</td>
+                <td id="lordelo_queue">0</td>
+                <td id="lordelo_wait">0</td>
+                <td id="lordelo_battery">0</td>
+            </tr>
+            <tr>
+                <th>Centro</th>
+                <td id="centro_chargers">0</td>
+                <td id="centro_queue">0</td>
+                <td id="centro_wait">0</td>
+                <td id="centro_battery">0</td>
+            </tr>
+            <tr>
+                <th>Bonfim</th>
+                <td id="bonfim_chargers">0</td>
+                <td id="bonfim_queue">0</td>
+                <td id="bonfim_wait">0</td>
+                <td id="bonfim_battery">0</td>
+            </tr>
+            <tr>
+                <th>Campanhã</th>
+                <td id="campanha_chargers">0</td>
+                <td id="campanha_queue">0</td>
+                <td id="campanha_wait">0</td>
+                <td id="campanha_battery">0</td>
+            </tr>
+        </table>
+    </div>
 
     <script>
 
