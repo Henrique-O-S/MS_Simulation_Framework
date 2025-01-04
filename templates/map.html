@@ -14,73 +14,72 @@
         <div id="clock">00:00:00</div>
         <div id="warning">Rush Hour!</div>
     </div>
-    <div id="map">
-        <table id="metrics">
-            <tr>
-                <th>Region</th>
-                <th>Chargers</th>
-                <th>Queue</th>
-                <th>Wait (min)</th>
-                <th>Battery (%)</th>
-            </tr>
-            <tr>
-                <td>Aldoar</td>
-                <td id="aldoar_chargers">0</td>
-                <td id="aldoar_queue">0</td>
-                <td id="aldoar_wait">0</td>
-                <td id="aldoar_battery">0</td>
-            </tr>
-            <tr>
-                <td>Ramalde</td>
-                <td id="ramalde_chargers">0</td>
-                <td id="ramalde_queue">0</td>
-                <td id="ramalde_wait">0</td>
-                <td id="ramalde_battery">0</td>
-            </tr>
-            <tr>
-                <td>Paranhos</td>
-                <td id="paranhos_chargers">0</td>
-                <td id="paranhos_queue">0</td>
-                <td id="paranhos_wait">0</td>
-                <td id="paranhos_battery">0</td>
-            </tr>
-            <tr>
-                <td>Lordelo</td>
-                <td id="lordelo_chargers">0</td>
-                <td id="lordelo_queue">0</td>
-                <td id="lordelo_wait">0</td>
-                <td id="lordelo_battery">0</td>
-            </tr>
-            <tr>
-                <td>Centro</td>
-                <td id="centro_chargers">0</td>
-                <td id="centro_queue">0</td>
-                <td id="centro_wait">0</td>
-                <td id="centro_battery">0</td>
-            </tr>
-            <tr>
-                <td>Bonfim</td>
-                <td id="bonfim_chargers">0</td>
-                <td id="bonfim_queue">0</td>
-                <td id="bonfim_wait">0</td>
-                <td id="bonfim_battery">0</td>
-            </tr>
-            <tr>
-                <td>Campanhã</td>
-                <td id="campanha_chargers">0</td>
-                <td id="campanha_queue">0</td>
-                <td id="campanha_wait">0</td>
-                <td id="campanha_battery">0</td>
-            </tr>
-            <tr>
-                <td>Porto</td>
-                <td id="porto_chargers">0</td>
-                <td id="porto_queue">0</td>
-                <td id="porto_wait">0</td>
-                <td id="porto_battery">0</td>
-            </tr>
-        </table>
-    </div>
+    <div id="map"></div>
+    <table id="metrics">
+        <tr>
+            <th>Region</th>
+            <th>Free Chargers (%)</th>
+            <th>Queue Size</th>
+            <th>Queue Wait (min)</th>
+            <th>Car Battery (%)</th>
+        </tr>
+        <tr>
+            <td>Aldoar</td>
+            <td id="aldoar_chargers">0</td>
+            <td id="aldoar_queue">0</td>
+            <td id="aldoar_wait">0</td>
+            <td id="aldoar_battery">0</td>
+        </tr>
+        <tr>
+            <td>Ramalde</td>
+            <td id="ramalde_chargers">0</td>
+            <td id="ramalde_queue">0</td>
+            <td id="ramalde_wait">0</td>
+            <td id="ramalde_battery">0</td>
+        </tr>
+        <tr>
+            <td>Paranhos</td>
+            <td id="paranhos_chargers">0</td>
+            <td id="paranhos_queue">0</td>
+            <td id="paranhos_wait">0</td>
+            <td id="paranhos_battery">0</td>
+        </tr>
+        <tr>
+            <td>Lordelo</td>
+            <td id="lordelo_chargers">0</td>
+            <td id="lordelo_queue">0</td>
+            <td id="lordelo_wait">0</td>
+            <td id="lordelo_battery">0</td>
+        </tr>
+        <tr>
+            <td>Centro</td>
+            <td id="centro_chargers">0</td>
+            <td id="centro_queue">0</td>
+            <td id="centro_wait">0</td>
+            <td id="centro_battery">0</td>
+        </tr>
+        <tr>
+            <td>Bonfim</td>
+            <td id="bonfim_chargers">0</td>
+            <td id="bonfim_queue">0</td>
+            <td id="bonfim_wait">0</td>
+            <td id="bonfim_battery">0</td>
+        </tr>
+        <tr>
+            <td>Campanhã</td>
+            <td id="campanha_chargers">0</td>
+            <td id="campanha_queue">0</td>
+            <td id="campanha_wait">0</td>
+            <td id="campanha_battery">0</td>
+        </tr>
+        <tr>
+            <td>Porto</td>
+            <td id="porto_chargers">0</td>
+            <td id="porto_queue">0</td>
+            <td id="porto_wait">0</td>
+            <td id="porto_battery">0</td>
+        </tr>
+    </table>
 
     <script>
 
@@ -138,6 +137,13 @@
                 document.getElementById('warning').style.display = 'none';
             }
 
+            porto_metrics = {
+                'chargers': 0,
+                'queue': 0,
+                'wait': 0,
+                'battery': 0
+            }
+
             // Update each set of coordinates
             data.region_data.forEach(function (region) {
                 // If a marker for this name already exists and its position has changed, update its position
@@ -167,7 +173,26 @@
                     }).addTo(map);
                     circles[region.name] = circle;
                 }
+
+                // update region metrics
+                document.getElementById(region.name.toLowerCase() + '_chargers').innerText = region.available_chargers;
+                porto_metrics['chargers'] += region.available_chargers;
+                document.getElementById(region.name.toLowerCase() + '_queue').innerText = region.queue_size;
+                porto_metrics['queue'] += region.queue_size;
+                document.getElementById(region.name.toLowerCase() + '_wait').innerText = region.wait_time;
+                porto_metrics['wait'] += region.wait_time;
+                document.getElementById(region.name.toLowerCase() + '_battery').innerText = region.autonomy;
+                porto_metrics['battery'] += region.autonomy;
             });
+
+            // update porto metrics
+            document.getElementById('porto_chargers').innerText = porto_metrics['chargers'];
+            porto_metrics['queue'] = Math.round(porto_metrics['queue'] / 7);
+            document.getElementById('porto_queue').innerText = porto_metrics['queue'];
+            porto_metrics['wait'] = Math.round(porto_metrics['wait'] / 7);
+            document.getElementById('porto_wait').innerText = porto_metrics['wait'];
+            porto_metrics['battery'] = Math.round(porto_metrics['battery'] / 7);
+            document.getElementById('porto_battery').innerText = porto_metrics['battery'];
 
             data.car_data.forEach(function (car) {
                 // If a marker for this name already exists and its position has changed, update its position

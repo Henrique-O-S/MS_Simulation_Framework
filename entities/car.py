@@ -237,10 +237,11 @@ class Car:
             
     # ---------------------------------------------------------------------------------------------------------
 
-    def run(self, rush_hour):
+    def run(self, step, rush_hour):
         if self.displayed:
             self.logger.log(f"{self.id} {self.state}")
-        self.home_region.update_autonomy(self.get_battery_percentage() * 100)
+        if step % 5 == 0:
+            self.home_region.update_autonomy(self.get_battery_percentage())
         if self.state == IDLE:
             self.idle(rush_hour)
         elif self.state == TRAVELING:
