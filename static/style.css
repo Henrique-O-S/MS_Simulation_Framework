@@ -1,0 +1,49 @@
+#clock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#clock {
+    font-size: 24px;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+#warning {
+    font-size: 28px;
+    font-weight: bold;
+    color: red;
+    display: none; /* Initially hidden */
+}
+
+#metrics {
+    border-collapse: collapse;
+    width: auto;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 12px;
+    background-color: white;
+    table-layout: fixed;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    background-color: rgb(229, 229, 229);
+}
+
+#metrics th, #metrics td {
+    border: 1px solid black;
+    text-align: center;
+    padding: 4px;
+    width: 70px; 
+    height: 15px; 
+}
+
+#metrics th {
+    background-color: #b4b5e9;
+}
+
+#metrics tr:last-child td {
+    font-weight: bold;
+}

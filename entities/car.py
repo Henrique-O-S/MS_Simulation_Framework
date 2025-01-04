@@ -222,7 +222,6 @@ class Car:
         else:
             charging_rate = float(os.getenv("CHARGING_PER_STEP_HOME")) if at_home else float(os.getenv("CHARGING_PER_STEP"))
             self.autonomy += charging_rate
-
             if random.random() < self.stop_charging_probability():
                 print("Car stopped charging early")
                 if not at_home:
