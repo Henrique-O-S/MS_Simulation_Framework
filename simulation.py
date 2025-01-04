@@ -4,7 +4,7 @@ import time
 import os
 import random
 
-from utils import stepsToTime
+from utils import stepsToTime, isBetweenHours
 
 # -------------------------------------------------------------------------------------------------------------
 
@@ -37,7 +37,7 @@ class Simulation:
     # ---------------------------------------------------------------------------------------------------------
     
     def checkRushHour(self, step):
-        if (step % self.steps_per_day >= self.steps_per_day * 7.5 / 24 and step % self.steps_per_day <= self.steps_per_day * 9 / 24) or (step % self.steps_per_day >= self.steps_per_day * 17 / 24 and step % self.steps_per_day <= self.steps_per_day * 19 / 24):
+        if (isBetweenHours(7.5, 9, step, self.steps_per_day) or isBetweenHours(17, 19, step, self.steps_per_day)):
             self.rush_hour = True
         else:
             self.rush_hour = False
@@ -51,8 +51,6 @@ class Simulation:
             self.checkRushHour(step)
             self.run_step(step)
             time.sleep(1 / 60) 
-        for region in self.regions:
-            region.save_history()
             
 # -------------------------------------------------------------------------------------------------------------
 
@@ -82,32 +80,14 @@ class SimulationVisualization:
 
     def update_visualization(self, step, rush_hour):
         regions_data = [
-            {
-                'name': region.id,
-                'lat': region.latitude,
-                'lng': region.longitude,
-                'cars_charged': region.cars_charged,
-                'stress_metric': region.stress_metric
-            }
+            {'name': region.id, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged, 'stress_metric': region.stress_metric}
             for region in self.regions
         ]
         cars_data = [
-            {
-                'name': car.id,
-                'lat': car.latitude,
-                'lng': car.longitude
-            }
+            {'name': car.id, 'lat': car.latitude, 'lng': car.longitude}
             for car in self.displayed_cars
         ]
-        self.socketio.emit(
-            'map_updated',
-            {
-                'region_data': regions_data,
-                'car_data': cars_data,
-                'time': stepsToTime(step, self.steps_per_day),
-                'rush_hour': rush_hour
-            }
-        )
+        self.socketio.emit('map_updated', {'region_data': regions_data, 'car_data': cars_data, 'time': stepsToTime(step, self.steps_per_day), 'rush_hour': rush_hour})
 
     # ---------------------------------------------------------------------------------------------------------
 

@@ -14,7 +14,7 @@
         <div id="clock">00:00:00</div>
         <div id="warning">Rush Hour!</div>
     </div>
-    <div id="map" style="height: 700px;">
+    <div id="map">
         <table id="metrics">
             <tr>
                 <th>Region</th>
@@ -96,14 +96,14 @@
         var centerIcon = new L.Icon({
             iconUrl: 'static/charging_station.png',
             shadowUrl: null,
-            iconSize: [50, 50],
+            iconSize: [40, 40],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
         });
 
         // Initialize the map
-        var map = L.map('map').setView([41.165, -8.61], 13);
+        var map = L.map('map').setView([41.165, -8.63], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 20,
         }).addTo(map);

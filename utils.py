@@ -126,8 +126,18 @@ def stepsToTime(step, steps_per_day):
     """
     Convert the number of steps to a time string in the format HH:MM.
     """
+    day = step // steps_per_day
+    step = step % steps_per_day
     hours = step // (steps_per_day // 24)
     minutes = (step % (steps_per_day // 24)) * 60 // (steps_per_day // 24)
-    return f"{hours:02d} : {minutes:02d} h"
+    return f"Day {day + 1}    -    {hours:02d} : {minutes:02d} h"
+
+
+def isBetweenHours(hour, hour2, step, steps_per_day):
+    """
+    Check if the current time is between the specified time.
+    """
+    step = step % steps_per_day
+    return step % steps_per_day >= steps_per_day * hour / 24 and step % steps_per_day <= steps_per_day * hour2 / 24
 
 # -------------------------------------------------------------------------------------------------------------

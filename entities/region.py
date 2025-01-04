@@ -102,6 +102,7 @@ class Region:
         self.queue_history.append(round(self.queue.qsize() / self.chargers, 2))
         self.wait_history.append(round(self.average_wait_time, 2))
         self.autonomy_history.append(round(self.average_autonomy, 2))
+        self.save_history()
         
     # ---------------------------------------------------------------------------------------------------------
         
