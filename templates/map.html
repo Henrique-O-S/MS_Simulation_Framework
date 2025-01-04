@@ -17,60 +17,67 @@
     <div id="map" style="height: 700px;">
         <table id="metrics">
             <tr>
-                <th></th>
+                <th>Region</th>
                 <th>Chargers</th>
                 <th>Queue</th>
-                <th>Wait</th>
-                <th>Battery</th>
+                <th>Wait (min)</th>
+                <th>Battery (%)</th>
             </tr>
             <tr>
-                <th>Aldoar</th>
+                <td>Aldoar</td>
                 <td id="aldoar_chargers">0</td>
                 <td id="aldoar_queue">0</td>
                 <td id="aldoar_wait">0</td>
                 <td id="aldoar_battery">0</td>
             </tr>
             <tr>
-                <th>Ramalde</th>
+                <td>Ramalde</td>
                 <td id="ramalde_chargers">0</td>
                 <td id="ramalde_queue">0</td>
                 <td id="ramalde_wait">0</td>
                 <td id="ramalde_battery">0</td>
             </tr>
             <tr>
-                <th>Paranhos</th>
+                <td>Paranhos</td>
                 <td id="paranhos_chargers">0</td>
                 <td id="paranhos_queue">0</td>
                 <td id="paranhos_wait">0</td>
                 <td id="paranhos_battery">0</td>
             </tr>
             <tr>
-                <th>Lordelo</th>
+                <td>Lordelo</td>
                 <td id="lordelo_chargers">0</td>
                 <td id="lordelo_queue">0</td>
                 <td id="lordelo_wait">0</td>
                 <td id="lordelo_battery">0</td>
             </tr>
             <tr>
-                <th>Centro</th>
+                <td>Centro</td>
                 <td id="centro_chargers">0</td>
                 <td id="centro_queue">0</td>
                 <td id="centro_wait">0</td>
                 <td id="centro_battery">0</td>
             </tr>
             <tr>
-                <th>Bonfim</th>
+                <td>Bonfim</td>
                 <td id="bonfim_chargers">0</td>
                 <td id="bonfim_queue">0</td>
                 <td id="bonfim_wait">0</td>
                 <td id="bonfim_battery">0</td>
             </tr>
             <tr>
-                <th>Campanhã</th>
+                <td>Campanhã</td>
                 <td id="campanha_chargers">0</td>
                 <td id="campanha_queue">0</td>
                 <td id="campanha_wait">0</td>
                 <td id="campanha_battery">0</td>
+            </tr>
+            <tr>
+                <td>Porto</td>
+                <td id="porto_chargers">0</td>
+                <td id="porto_queue">0</td>
+                <td id="porto_wait">0</td>
+                <td id="porto_battery">0</td>
             </tr>
         </table>
     </div>
@@ -96,7 +103,7 @@
         });
 
         // Initialize the map
-        var map = L.map('map').setView([41.16, -8.63], 13);
+        var map = L.map('map').setView([41.165, -8.61], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 20,
         }).addTo(map);
