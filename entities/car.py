@@ -30,11 +30,13 @@ class Car:
         self.autonomy = autonomy * random.uniform(0.5, 1.0)
         self.velocity = velocity / (int(os.getenv("STEPS_PER_DAY")) / 24) # km/step
         self.current_region = current_region
+        self.current_region.cars_present += 1
         self.home_region = current_region
         self.latitude = current_region.latitude
         self.longitude = current_region.longitude
         self.distance_travelled = 0
         self.wait_time = 0
+        self.charging_time = 0
         self.regions = regions
         self.next_region = None
         self.charge_at_destination = False
@@ -57,7 +59,9 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
     
     def arrived_at_destination(self):
+        self.current_region.cars_present -= 1
         self.current_region = self.next_region
+        self.current_region.cars_present += 1
         self.next_region = None
         
     # ---------------------------------------------------------------------------------------------------------
@@ -102,6 +106,7 @@ class Car:
         if random.random() < float(os.getenv("PROBABILITY_OF_CHARGING")):
             if self.current_region == self.home_region and random.random() < float(os.getenv("PROBABILITY_OF_CHARGING_AT_HOME")):
                 self.state = CHARGING_AT_HOME
+                self.home_region.cars_home_charging += 1
             else:
                 self.state = DECIDE_CHARGING
                 
@@ -195,7 +200,7 @@ class Car:
     def before_charging(self):
         if self.current_region.start_charging(self):
             self.stuck_at_region = False
-            self.state = CHARGING
+            self.exit_queue() # queue was empty
         else:
             self.state = IN_QUEUE
             
@@ -216,32 +221,28 @@ class Car:
     def charging(self, at_home=False):
         if self.autonomy >= self.full_autonomy:
             self.autonomy = self.full_autonomy
-            if not at_home:
-                self.current_region.stop_charging()
+            self.current_region.stop_charging(self.charging_time, at_home)
+            self.charging_time = 0
             self.state = IDLE
         else:
             charging_rate = float(os.getenv("CHARGING_PER_STEP_HOME")) if at_home else float(os.getenv("CHARGING_PER_STEP"))
             self.autonomy += charging_rate
+            self.charging_time += 1
             if random.random() < self.stop_charging_probability():
-                print("Car stopped charging early")
-                if not at_home:
-                    self.current_region.stop_charging()
-                self.state = IDLE         
+                self.current_region.stop_charging(self.charging_time, at_home)
+                self.charging_time = 0
+                self.state = IDLE
 
     def stop_charging_probability(self):
         battery_perc = self.get_battery_percentage()
         if battery_perc < 50:
             return 0
         else:
-            return (battery_perc - 50) / 1000  # Linearly increase from 0 to 5% probability 
-            
+            return (battery_perc - 50) / 1000  # Linearly increase from 0 to 5% probability  
+        
     # ---------------------------------------------------------------------------------------------------------
 
-    def run(self, step, rush_hour):
-        if self.displayed:
-            self.logger.log(f"{self.id} {self.state}")
-        if step % 5 == 0:
-            self.home_region.update_autonomy(self.get_battery_percentage())
+    def run(self, rush_hour):
         if self.state == IDLE:
             self.idle(rush_hour)
         elif self.state == TRAVELING:
@@ -256,5 +257,8 @@ class Car:
             self.charging()
         elif self.state == CHARGING_AT_HOME:
             self.charging(at_home=True)
+        self.home_region.update_autonomy(self.get_battery_percentage())
+        if self.displayed:
+            self.logger.log(f"{self.id} {self.state}")
             
 # -------------------------------------------------------------------------------------------------------------

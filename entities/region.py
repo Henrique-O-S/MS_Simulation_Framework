@@ -24,35 +24,55 @@ class Region:
         self.avg_income = int(avg_income)
         self.chargers = chargers
         self.traffic = traffic
-        self.available_chargers = chargers
-        self.average_queue_size = 0
         self.total_cars = 0
-        self.total_autonomy = 0
         self.queue = queue.Queue()
+        self.logger = Logger(filename=str(id))
+        
+        # metrics
+        self.cars_present = 0
+        self.cars_home_charging = 0
+        self.home_charged = 0
+        self.available_chargers = chargers
         self.queued_cars = 0
         self.cars_charged = 0
+        self.total_autonomy = 0
+        self.average_autonomy = 0
+        
+        # KPIs
+        self.average_home_time = 0
+        self.charger_utilization = 0
+        self.average_queue_size = 0
         self.stress_metric = 0
         self.average_wait_time = 0
-        self.average_autonomy = 0
-        self.logger = Logger(filename=str(id))
+        self.average_charging_time = 0
+        
+        # history
+        self.home_time_history = []
         self.charger_history = []
         self.queue_history = []
+        self.stress_history = []
         self.wait_history = []
-        self.autonomy_history = []
+        self.charging_time_history = []
         
     # ---------------------------------------------------------------------------------------------------------
 
-    def stop_charging(self):
-        self.available_chargers += 1
-        self.cars_charged += 1
-        self.logger.log("Car has stopped charging")
-        self.logger.log("Available chargers: " + str(self.available_chargers))
-        self.logger.log("Cars charged: " + str(self.cars_charged))
-        self.logger.log("")
-        if not self.queue.empty():
-            next_car = self.queue.get()
-            next_car.exit_queue()
-            self.start_charging(next_car)
+    def stop_charging(self, charging_time, at_home):
+        if at_home:
+            self.cars_home_charging -= 1
+            self.home_charged += 1
+            self.average_home_time = (self.average_home_time * (self.home_charged - 1) + charging_time) / self.home_charged
+        else:
+            self.available_chargers += 1
+            self.cars_charged += 1
+            self.average_charging_time = (self.average_charging_time * (self.cars_charged - 1) + charging_time) / self.cars_charged
+            self.logger.log("Car has stopped charging")
+            self.logger.log("Available chargers: " + str(self.available_chargers))
+            self.logger.log("Cars charged: " + str(self.cars_charged))
+            self.logger.log("")
+            if not self.queue.empty():
+                next_car = self.queue.get()
+                next_car.exit_queue()
+                self.start_charging(next_car)
             
     # ---------------------------------------------------------------------------------------------------------
 
@@ -74,20 +94,6 @@ class Region:
 
     def get_status(self):
         return self.available_chargers, self.queue.qsize()
-    
-    # ---------------------------------------------------------------------------------------------------------
-    
-    def update(self):
-        ALFA = 1
-        self.stress_metric = 1 - (self.available_chargers / self.chargers ) + ALFA * (self.queue.qsize() / self.chargers)
-        self.average_autonomy = self.total_autonomy / self.total_cars
-        self.total_autonomy = 0
-        self.average_queue_size = round(self.queue.qsize() / self.chargers, 2)
-        self.charger_history.append(self.available_chargers)
-        self.queue_history.append(round(self.average_queue_size, 2))
-        self.wait_history.append(round(self.average_wait_time, 2))
-        self.autonomy_history.append(round(self.average_autonomy, 2))
-        self.save_history()
         
     # ---------------------------------------------------------------------------------------------------------
         
@@ -102,20 +108,32 @@ class Region:
         
     # ---------------------------------------------------------------------------------------------------------
         
-    def run(self, step):
-        if step % 5 == 0:
-            self.update()
+    def run(self):
+        self.average_autonomy = self.total_autonomy / self.total_cars
+        self.total_autonomy = 0
+        self.charger_utilization = round((1 - (self.available_chargers / self.chargers)) * 100, 2)
+        self.average_queue_size = round(self.queue.qsize() / self.chargers, 2)
+        ALFA = 1
+        self.stress_metric = round(1 - (self.available_chargers / self.chargers) + ALFA * (self.queue.qsize() / self.chargers), 2)
+        self.home_time_history.append(round(self.average_home_time, 2))
+        self.charger_history.append(round(self.charger_utilization, 2))
+        self.queue_history.append(round(self.average_queue_size, 2))
+        self.stress_history.append(round(self.stress_metric, 2))
+        self.wait_history.append(round(self.average_wait_time, 2))
+        self.charging_time_history.append(round(self.average_charging_time, 2))
         
     # ---------------------------------------------------------------------------------------------------------
         
     def save_history(self):
         history = {
-            "chargers": self.charger_history,
+            "home_time": self.home_time_history,
+            "charger": self.charger_history,
             "queue": self.queue_history,
+            "stress": self.stress_history,
             "wait": self.wait_history,
-            "autonomy": self.autonomy_history
+            "charging_time": self.charging_time_history
         }
-        # with open('logs/outputs/' + self.id + '.json', 'w') as f:
-        #     json.dump(history, f)
+        with open('logs/outputs/' + self.id + '.json', 'w') as f:
+            json.dump(history, f)
 
 # -------------------------------------------------------------------------------------------------------------

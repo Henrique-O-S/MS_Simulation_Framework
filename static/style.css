@@ -26,21 +26,18 @@
 #metrics {
     border-collapse: collapse;
     width: auto;
-    position: absolute;
-    top: 6%;
-    right: 10px;
     font-size: 14px;
     table-layout: fixed;
     background-color: white;
     background-color: rgb(229, 229, 229);
-    width: 39%;
-    height: 50vh;
 }
 
 #metrics th, #metrics td {
     border: 1px solid black;
     text-align: center;
     padding: 4px;
+    width: 120px;
+    height: 20px;
 }
 
 #metrics th {
@@ -50,3 +47,29 @@
 #metrics tr:last-child td {
     font-weight: bold;
 }
+
+#kpis {
+    border-collapse: collapse;
+    width: auto;
+    font-size: 14px;
+    table-layout: fixed;
+    background-color: white;
+    background-color: rgb(229, 229, 229);
+}
+
+#kpis th, #kpis td {
+    border: 1px solid black;
+    text-align: center;
+    padding: 4px;
+    width: 120px;
+    height: 20px;
+}
+
+#kpis th {
+    background-color: #b4b5e9;
+}
+
+#kpis tr:last-child td {
+    font-weight: bold;
+}
+
