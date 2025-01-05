@@ -42,6 +42,13 @@ class Car:
         self.charge_at_destination = False
         self.stuck_at_region = False
         self.state = IDLE
+        self.idle_probabilities = {
+            "rush_hour": float(os.getenv("CHANCE_OF_STAYING_IDLE_RUSH_HOUR")),
+            "lunch_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_LUNCH_TIME")),
+            "night_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_NIGHT_TIME")),
+            "dawn_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_DAWN_TIME")),
+            "default": float(os.getenv("CHANCE_OF_STAYING_IDLE"))
+        }
         self.displayed = False
         self.stepsToTravel = 0
         self.currentTripSteps = 0
@@ -94,20 +101,10 @@ class Car:
 
     def idle(self, time_of_day):
         battery_threshold = float(os.getenv("AUTONOMY_TOLERANCE"))
-        
-        # Determine the idle probability based on the time of day
-        idle_probabilities = {
-            "rush_hour": float(os.getenv("CHANCE_OF_STAYING_IDLE_RUSH_HOUR")),
-            "lunch_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_LUNCH_TIME")),
-            "night_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_NIGHT_TIME")),
-            "dawn_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_DAWN_TIME")),
-            "default": float(os.getenv("CHANCE_OF_STAYING_IDLE"))
-        }
-        idle_probability = idle_probabilities.get(time_of_day, idle_probabilities["default"])
-
+        idle_chance = self.idle_probabilities.get(time_of_day, self.idle_probabilities["default"])
         if self.get_battery_percentage() < battery_threshold:
             self.consider_charging()
-        elif random.random() >= idle_probability:
+        elif random.random() >= idle_chance:
             self.consider_traveling()
 
     # ---------------------------------------------------------------------------------------------------------
