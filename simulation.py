@@ -14,17 +14,17 @@ class Simulation:
         self.regions = regions
         self.visualization = SimulationVisualization(app, socketio, regions, cars)
         self.running = True
-        self.rush_hour = False
+        self.time_of_day = "default"
         self.steps_per_day = int(os.getenv("STEPS_PER_DAY"))
         
     # ---------------------------------------------------------------------------------------------------------
 
     def run_step(self, step):
         for car in self.cars:
-            car.run(self.rush_hour)
+            car.run(self.time_of_day)
         for region in self.regions:
             region.run()
-        self.visualization.update_visualization(step, self.rush_hour)
+        self.visualization.update_visualization(step, self.time_of_day)
         if self.check_simulation_end():
             self.visualization.signal_end()
             self.running = False
@@ -36,11 +36,22 @@ class Simulation:
     
     # ---------------------------------------------------------------------------------------------------------
     
-    def checkRushHour(self, step):
-        if (isBetweenHours(7.5, 9, step, self.steps_per_day) or isBetweenHours(17, 19, step, self.steps_per_day)):
-            self.rush_hour = True
-        else:
-            self.rush_hour = False
+    def checkTimeOfDay(self, step):
+        time_ranges = [
+            ((7.5, 9), "rush_hour"),
+            ((17, 19), "rush_hour"),
+            ((12, 14), "lunch_time"),
+            ((21, 23.99), "night_time"),
+            ((0, 6), "dawn_time"),
+        ]
+
+        for (start, end), label in time_ranges:
+            if isBetweenHours(start, end, step, self.steps_per_day):
+                self.time_of_day = label
+                return
+        
+        # Default case
+        self.time_of_day = "default"
             
     # ---------------------------------------------------------------------------------------------------------
 
@@ -48,7 +59,7 @@ class Simulation:
         for step in range(steps):
             if not self.running:
                 break
-            self.checkRushHour(step)
+            self.checkTimeOfDay(step)
             self.run_step(step)
             time.sleep(1 / 60)
         for region in self.regions:
@@ -80,7 +91,7 @@ class SimulationVisualization:
             
     # ---------------------------------------------------------------------------------------------------------
 
-    def update_visualization(self, step, rush_hour):
+    def update_visualization(self, step, time_of_day):
         regions_data = [
             {
                 'name': region.id,
@@ -116,7 +127,7 @@ class SimulationVisualization:
                 'region_data': regions_data,
                 'car_data': cars_data,
                 'time': stepsToTime(step, self.steps_per_day),
-                'rush_hour': rush_hour
+                'rush_hour': time_of_day
             }
         )
 

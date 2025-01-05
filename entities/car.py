@@ -92,13 +92,23 @@ class Car:
         
     # ---------------------------------------------------------------------------------------------------------
 
-    def idle(self, rush_hour):
-        if self.get_battery_percentage() < float(os.getenv("AUTONOMY_TOLERANCE")):
+    def idle(self, time_of_day):
+        battery_threshold = float(os.getenv("AUTONOMY_TOLERANCE"))
+        
+        # Determine the idle probability based on the time of day
+        idle_probabilities = {
+            "rush_hour": float(os.getenv("CHANCE_OF_STAYING_IDLE_RUSH_HOUR")),
+            "lunch_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_LUNCH_TIME")),
+            "night_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_NIGHT_TIME")),
+            "dawn_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_DAWN_TIME")),
+            "default": float(os.getenv("CHANCE_OF_STAYING_IDLE"))
+        }
+        idle_probability = idle_probabilities.get(time_of_day, idle_probabilities["default"])
+
+        if self.get_battery_percentage() < battery_threshold:
             self.consider_charging()
-        else:
-            idle_probability = float(os.getenv("CHANCE_OF_STAYING_IDLE_RUSH_HOUR")) if rush_hour else float(os.getenv("CHANCE_OF_STAYING_IDLE"))
-            if random.random() >= idle_probability:
-                self.consider_traveling()
+        elif random.random() >= idle_probability:
+            self.consider_traveling()
 
     # ---------------------------------------------------------------------------------------------------------
 
@@ -242,9 +252,9 @@ class Car:
         
     # ---------------------------------------------------------------------------------------------------------
 
-    def run(self, rush_hour):
+    def run(self, time_of_day):
         if self.state == IDLE:
-            self.idle(rush_hour)
+            self.idle(time_of_day)
         elif self.state == TRAVELING:
             self.traveling()
         elif self.state == DECIDE_CHARGING:
