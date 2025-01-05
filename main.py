@@ -100,6 +100,7 @@ class Application:
             self.read_car_model_data(car_file, car_models)
             
         cars = self.generate_cars(car_models, regions)
+        print(f"\n{len(cars)} cars generated.")
 
         simulation = Simulation(cars, regions, self.app, self.socketio)
         print("\nStarting simulation...")

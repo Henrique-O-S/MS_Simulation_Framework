@@ -1,0 +1,75 @@
+#clock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#clock {
+    font-size: 24px;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+#warning {
+    font-size: 28px;
+    font-weight: bold;
+    color: red;
+    display: none; /* Initially hidden */
+}
+
+#map {
+    height: 50vh;
+    width: 60%;
+}
+
+#metrics {
+    border-collapse: collapse;
+    width: auto;
+    font-size: 14px;
+    table-layout: fixed;
+    background-color: white;
+    background-color: rgb(229, 229, 229);
+}
+
+#metrics th, #metrics td {
+    border: 1px solid black;
+    text-align: center;
+    padding: 4px;
+    width: 120px;
+    height: 20px;
+}
+
+#metrics th {
+    background-color: #b4b5e9;
+}
+
+#metrics tr:last-child td {
+    font-weight: bold;
+}
+
+#kpis {
+    border-collapse: collapse;
+    width: auto;
+    font-size: 14px;
+    table-layout: fixed;
+    background-color: white;
+    background-color: rgb(229, 229, 229);
+}
+
+#kpis th, #kpis td {
+    border: 1px solid black;
+    text-align: center;
+    padding: 4px;
+    width: 120px;
+    height: 20px;
+}
+
+#kpis th {
+    background-color: #b4b5e9;
+}
+
+#kpis tr:last-child td {
+    font-weight: bold;
+}
+

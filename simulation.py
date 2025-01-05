@@ -23,7 +23,7 @@ class Simulation:
         for car in self.cars:
             car.run(self.time_of_day)
         for region in self.regions:
-            region.run(step)
+            region.run()
         self.visualization.update_visualization(step, self.time_of_day)
         if self.check_simulation_end():
             self.visualization.signal_end()
@@ -61,7 +61,9 @@ class Simulation:
                 break
             self.checkTimeOfDay(step)
             self.run_step(step)
-            time.sleep(1 / 60) 
+            time.sleep(1 / 60)
+        for region in self.regions:
+            region.save_history()
             
 # -------------------------------------------------------------------------------------------------------------
 
@@ -91,14 +93,43 @@ class SimulationVisualization:
 
     def update_visualization(self, step, time_of_day):
         regions_data = [
-            {'name': region.id, 'lat': region.latitude, 'lng': region.longitude, 'cars_charged': region.cars_charged, 'stress_metric': region.stress_metric}
+            {
+                'name': region.id,
+                'lat': region.latitude,
+                'lng': region.longitude,
+                'cars_present': region.cars_present,
+                'home_charging': region.cars_home_charging,
+                'available_chargers': region.available_chargers,
+                'queued_cars': region.queue.qsize(),
+                'cars_charged': region.cars_charged,
+                'autonomy': round(region.average_autonomy),
+                'home_time': round(region.average_home_time),
+                'charger_utilization': round(region.charger_utilization),
+                'queue_size': round(region.average_queue_size),
+                'stress_metric': round(region.stress_metric, 1),
+                'wait_time': round(region.average_wait_time),
+                'charging_time': round(region.average_charging_time)
+            }
             for region in self.regions
         ]
         cars_data = [
-            {'name': car.id, 'lat': car.latitude, 'lng': car.longitude}
+            {
+                'name': car.id,
+                'lat': car.latitude,
+                'lng': car.longitude
+            }
             for car in self.displayed_cars
         ]
-        self.socketio.emit('map_updated', {'region_data': regions_data, 'car_data': cars_data, 'time': stepsToTime(step, self.steps_per_day), 'rush_hour': time_of_day})
+        self.socketio.emit(
+            'map_updated',
+            {
+                'step': step,
+                'region_data': regions_data,
+                'car_data': cars_data,
+                'time': stepsToTime(step, self.steps_per_day),
+                'rush_hour': time_of_day
+            }
+        )
 
     # ---------------------------------------------------------------------------------------------------------
 
