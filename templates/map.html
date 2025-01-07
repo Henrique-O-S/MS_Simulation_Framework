@@ -6,30 +6,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
-    <style>
-        #clock-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        #clock {
-            font-size: 24px;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        #warning {
-            font-size: 28px;
-            font-weight: bold;
-            color: red;
-            display: none; /* Initially hidden */
-        }
-
-        #map {
-            height: 50vh;
-            width: 60%;
-        }
-    </style>
+    <link rel="stylesheet" href="static/style.css" />
 </head>
 
 <body>
@@ -37,7 +14,182 @@
         <div id="clock">00:00:00</div>
         <div id="warning">Rush Hour!</div>
     </div>
-    <div id="map""></div>
+    <div id="map"></div>
+    <table id="metrics">
+        <tr>
+            <th>Region</th>
+            <th>Cars Present</th>
+            <th>Home Charging</th>
+            <th>Available Chargers</th>
+            <th>Cars Waiting</th>
+            <th>Cars Charged</th>
+            <th>Avg Car Battery (%)</th>
+        </tr>
+        <tr>
+            <td>Aldoar</td>
+            <td id="aldoar_cars">0</td>
+            <td id="aldoar_home">0</td>
+            <td id="aldoar_chargers">0</td>
+            <td id="aldoar_queue">0</td>
+            <td id="aldoar_charged">0</td>
+            <td id="aldoar_battery">0</td>
+        </tr>
+        <tr>
+            <td>Ramalde</td>
+            <td id="ramalde_cars">0</td>
+            <td id="ramalde_home">0</td>
+            <td id="ramalde_chargers">0</td>
+            <td id="ramalde_queue">0</td>
+            <td id="ramalde_charged">0</td>
+            <td id="ramalde_battery">0</td>
+        </tr>
+        <tr>
+            <td>Paranhos</td>
+            <td id="paranhos_cars">0</td>
+            <td id="paranhos_home">0</td>
+            <td id="paranhos_chargers">0</td>
+            <td id="paranhos_queue">0</td>
+            <td id="paranhos_charged">0</td>
+            <td id="paranhos_battery">0</td>
+        </tr>
+        <tr>
+            <td>Lordelo</td>
+            <td id="lordelo_cars">0</td>
+            <td id="lordelo_home">0</td>
+            <td id="lordelo_chargers">0</td>
+            <td id="lordelo_queue">0</td>
+            <td id="lordelo_charged">0</td>
+            <td id="lordelo_battery">0</td>
+        </tr>
+        <tr>
+            <td>Centro</td>
+            <td id="centro_cars">0</td>
+            <td id="centro_home">0</td>
+            <td id="centro_chargers">0</td>
+            <td id="centro_queue">0</td>
+            <td id="centro_charged">0</td>
+            <td id="centro_battery">0</td>
+        </tr>
+        <tr>
+            <td>Bonfim</td>
+            <td id="bonfim_cars">0</td>
+            <td id="bonfim_home">0</td>
+            <td id="bonfim_chargers">0</td>
+            <td id="bonfim_queue">0</td>
+            <td id="bonfim_charged">0</td>
+            <td id="bonfim_battery">0</td>
+        </tr>
+        <tr>
+            <td>Campanhã</td>
+            <td id="campanha_cars">0</td>
+            <td id="campanha_home">0</td>
+            <td id="campanha_chargers">0</td>
+            <td id="campanha_queue">0</td>
+            <td id="campanha_charged">0</td>
+            <td id="campanha_battery">0</td>
+        </tr>
+        <tr>
+            <td>Porto</td>
+            <td id="porto_cars">0</td>
+            <td id="porto_home">0</td>
+            <td id="porto_chargers">0</td>
+            <td id="porto_queue">0</td>
+            <td id="porto_charged">0</td>
+            <td id="porto_battery">0</td>
+        </tr>
+    </table>
+    <table id="kpis">
+        <tr>
+            <th>Region</th>
+            <th>Avg Home Charging Time (min)</th>
+            <th>Charger Utilization (%)</th>
+            <th>Regional Imbalance (%)</th>
+            <th>Avg Queue Size</th>
+            <th>Stress Level</th>
+            <th>Avg Wait Time (min)</th>
+            <th>Avg Charging Time (min)</th>
+        </tr>
+        <tr>
+            <td>Aldoar</td>
+            <td id="aldoar_home_time">0</td>
+            <td id="aldoar_charger_utilization">0</td>
+            <td id="aldoar_regional_imbalance">-</td>
+            <td id="aldoar_queue_size">0</td>
+            <td id="aldoar_stress">0</td>
+            <td id="aldoar_wait">0</td>
+            <td id="aldoar_charging">0</td>
+        </tr>
+        <tr>
+            <td>Ramalde</td>
+            <td id="ramalde_home_time">0</td>
+            <td id="ramalde_charger_utilization">0</td>
+            <td id="ramalde_regional_imbalance">-</td>
+            <td id="ramalde_queue_size">0</td>
+            <td id="ramalde_stress">0</td>
+            <td id="ramalde_wait">0</td>
+            <td id="ramalde_charging">0</td>
+        </tr>
+        <tr>
+            <td>Paranhos</td>
+            <td id="paranhos_home_time">0</td>
+            <td id="paranhos_charger_utilization">0</td>
+            <td id="paranhos_regional_imbalance">-</td>
+            <td id="paranhos_queue_size">0</td>
+            <td id="paranhos_stress">0</td>
+            <td id="paranhos_wait">0</td>
+            <td id="paranhos_charging">0</td>
+        </tr>
+        <tr>
+            <td>Lordelo</td>
+            <td id="lordelo_home_time">0</td>
+            <td id="lordelo_charger_utilization">0</td>
+            <td id="lordelo_regional_imbalance">-</td>
+            <td id="lordelo_queue_size">0</td>
+            <td id="lordelo_stress">0</td>
+            <td id="lordelo_wait">0</td>
+            <td id="lordelo_charging">0</td>
+        </tr>
+        <tr>
+            <td>Centro</td>
+            <td id="centro_home_time">0</td>
+            <td id="centro_charger_utilization">0</td>
+            <td id="centro_regional_imbalance">-</td>
+            <td id="centro_queue_size">0</td>
+            <td id="centro_stress">0</td>
+            <td id="centro_wait">0</td>
+            <td id="centro_charging">0</td>
+        </tr>
+        <tr>
+            <td>Bonfim</td>
+            <td id="bonfim_home_time">0</td>
+            <td id="bonfim_charger_utilization">0</td>
+            <td id="bonfim_regional_imbalance">-</td>
+            <td id="bonfim_queue_size">0</td>
+            <td id="bonfim_stress">0</td>
+            <td id="bonfim_wait">0</td>
+            <td id="bonfim_charging">0</td>
+        </tr>
+        <tr>
+            <td>Campanhã</td>
+            <td id="campanha_home_time">0</td>
+            <td id="campanha_charger_utilization">0</td>
+            <td id="campanha_regional_imbalance">-</td>
+            <td id="campanha_queue_size">0</td>
+            <td id="campanha_stress">0</td>
+            <td id="campanha_wait">0</td>
+            <td id="campanha_charging">0</td>
+        </tr>
+        <tr>
+            <td>Porto</td>
+            <td id="porto_home_time">0</td>
+            <td id="porto_charger_utilization">0</td>
+            <td id="porto_regional_imbalance">0</td>
+            <td id="porto_queue_size">0</td>
+            <td id="porto_stress">0</td>
+            <td id="porto_wait">0</td>
+            <td id="porto_charging">0</td>
+        </tr>
+    </table>
 
     <script>
 
@@ -95,6 +247,24 @@
                 document.getElementById('warning').style.display = 'none';
             }
 
+            porto_metrics = {
+                'cars': 0,
+                'home': 0,
+                'chargers': 0,
+                'queue': 0,
+                'charged': 0,
+                'battery': 0,
+            }
+            porto_kpis = {
+                'home': 0,
+                'charger_utilization': 0,
+                'regional_imbalance': [],
+                'queue': 0,
+                'stress': 0,
+                'wait': 0,
+                'charging': 0
+            }
+
             // Update each set of coordinates
             data.region_data.forEach(function (region) {
                 // If a marker for this name already exists and its position has changed, update its position
@@ -108,23 +278,79 @@
                     markers[region.name] = marker;
                 }
 
-                // Draw or update the circle based on the stress metric
-                var color = getColor(region.stress_metric);
+                if (data.step % 5 == 0) {
+                    // Draw or update the circle based on the stress metric
+                    var color = getColor(region.stress_metric);
+                    if (circles[region.name]) {
+                        circles[region.name].setLatLng([region.lat, region.lng]);
+                        circles[region.name].setStyle({ color: color, fillColor: color });
+                        circles[region.name].setRadius(1000);
+                    } else {
+                        var circle = L.circle([region.lat, region.lng], {
+                            color: color,
+                            fillColor: color,
+                            fillOpacity: 0.5,
+                            radius: 1000
+                        }).addTo(map);
+                        circles[region.name] = circle;
+                    }
+                }
+                
+                if (data.step % 10 == 0) {
+                    document.getElementById(region.name.toLowerCase() + '_cars').innerText = region.cars_present;
+                    porto_metrics['cars'] += region.cars_present;
+                    document.getElementById(region.name.toLowerCase() + '_home').innerText = region.home_charging;
+                    porto_metrics['home'] += region.home_charging;
+                    document.getElementById(region.name.toLowerCase() + '_chargers').innerText = region.available_chargers;
+                    porto_metrics['chargers'] += region.available_chargers;
+                    document.getElementById(region.name.toLowerCase() + '_queue').innerText = region.queue_size;
+                    porto_metrics['queue'] += region.queue_size;
+                    document.getElementById(region.name.toLowerCase() + '_charged').innerText = region.cars_charged;
+                    porto_metrics['charged'] += region.cars_charged;
+                    document.getElementById(region.name.toLowerCase() + '_battery').innerText = region.autonomy;
+                    porto_metrics['battery'] += region.autonomy;
 
-                if (circles[region.name]) {
-                    circles[region.name].setLatLng([region.lat, region.lng]);
-                    circles[region.name].setStyle({ color: color, fillColor: color });
-                    circles[region.name].setRadius(1000);
-                } else {
-                    var circle = L.circle([region.lat, region.lng], {
-                        color: color,
-                        fillColor: color,
-                        fillOpacity: 0.5,
-                        radius: 1000
-                    }).addTo(map);
-                    circles[region.name] = circle;
+                    document.getElementById(region.name.toLowerCase() + '_home_time').innerText = region.home_time;
+                    porto_kpis['home'] += region.home_time;
+                    document.getElementById(region.name.toLowerCase() + '_charger_utilization').innerText = region.charger_utilization;
+                    porto_kpis['charger_utilization'] += region.charger_utilization;
+                    porto_kpis['regional_imbalance'].push(region.charger_utilization);
+                    document.getElementById(region.name.toLowerCase() + '_queue_size').innerText = region.queue_size;
+                    porto_kpis['queue'] += region.queue_size;
+                    document.getElementById(region.name.toLowerCase() + '_stress').innerText = region.stress_metric;
+                    porto_kpis['stress'] += region.stress_metric;
+                    document.getElementById(region.name.toLowerCase() + '_wait').innerText = region.wait_time;
+                    porto_kpis['wait'] += region.wait_time;
+                    document.getElementById(region.name.toLowerCase() + '_charging').innerText = region.charging_time;
+                    porto_kpis['charging'] += region.charging_time;
                 }
             });
+
+            if (data.step % 10 == 0) {
+                document.getElementById('porto_cars').innerText = porto_metrics['cars'];
+                document.getElementById('porto_home').innerText = porto_metrics['home'];
+                document.getElementById('porto_chargers').innerText = porto_metrics['chargers'];
+                document.getElementById('porto_queue').innerText = porto_metrics['queue'];
+                document.getElementById('porto_charged').innerText = porto_metrics['charged'];
+                porto_metrics['battery'] = Math.round(porto_metrics['battery'] / 7);
+                document.getElementById('porto_battery').innerText = porto_metrics['battery'];
+
+                porto_kpis['home'] = Math.round(porto_kpis['home'] / 7);
+                document.getElementById('porto_home_time').innerText = porto_kpis['home'];
+                porto_kpis['charger_utilization'] = Math.round(porto_kpis['charger_utilization'] / 7);
+                document.getElementById('porto_charger_utilization').innerText = porto_kpis['charger_utilization'];
+                const variance = porto_kpis['regional_imbalance'].reduce((sum, num) => sum + Math.pow(num - porto_kpis['charger_utilization'], 2), 0) / 7;
+                porto_kpis['regional_imbalance'] = Math.round(Math.sqrt(variance));
+                document.getElementById('porto_regional_imbalance').innerText = porto_kpis['regional_imbalance'];
+                porto_kpis['queue'] = Math.round(porto_kpis['queue'] / 7);
+                document.getElementById('porto_queue_size').innerText = porto_kpis['queue'];
+                porto_kpis['stress'] = Math.round(porto_kpis['stress'] / 7);
+                document.getElementById('porto_stress').innerText = porto_kpis['stress'];
+                porto_kpis['wait'] = Math.round(porto_kpis['wait'] / 7);
+                document.getElementById('porto_wait').innerText = porto_kpis['wait'];
+                porto_kpis['charging'] = Math.round(porto_kpis['charging'] / 7);
+                document.getElementById('porto_charging').innerText = porto_kpis['charging'];
+            }
 
             data.car_data.forEach(function (car) {
                 // If a marker for this name already exists and its position has changed, update its position

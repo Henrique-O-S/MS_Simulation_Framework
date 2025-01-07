@@ -30,16 +30,25 @@ class Car:
         self.autonomy = autonomy * random.uniform(0.5, 1.0)
         self.velocity = velocity / (int(os.getenv("STEPS_PER_DAY")) / 24) # km/step
         self.current_region = current_region
+        self.current_region.cars_present += 1
         self.home_region = current_region
         self.latitude = current_region.latitude
         self.longitude = current_region.longitude
         self.distance_travelled = 0
         self.wait_time = 0
+        self.charging_time = 0
         self.regions = regions
         self.next_region = None
         self.charge_at_destination = False
         self.stuck_at_region = False
         self.state = IDLE
+        self.idle_probabilities = {
+            "rush_hour": float(os.getenv("CHANCE_OF_STAYING_IDLE_RUSH_HOUR")),
+            "lunch_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_LUNCH_TIME")),
+            "night_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_NIGHT_TIME")),
+            "dawn_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_DAWN_TIME")),
+            "default": float(os.getenv("CHANCE_OF_STAYING_IDLE"))
+        }
         self.displayed = False
         self.stepsToTravel = 0
         self.currentTripSteps = 0
@@ -48,6 +57,7 @@ class Car:
         self.availabilityWeigh = float(os.getenv("AVAILABILITY_WEIGHT"))
         self.distanceWeight = float(os.getenv("DISTANCE_WEIGHT"))
         self.queueWeigh = float(os.getenv("QUEUE_WEIGHT"))
+        self.stop_charging_at_home = False
         
     # ---------------------------------------------------------------------------------------------------------
 
@@ -57,7 +67,9 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
     
     def arrived_at_destination(self):
+        self.current_region.cars_present -= 1
         self.current_region = self.next_region
+        self.current_region.cars_present += 1
         self.next_region = None
         
     # ---------------------------------------------------------------------------------------------------------
@@ -83,27 +95,12 @@ class Car:
     
     # ---------------------------------------------------------------------------------------------------------
 
-    def charge(self):
-        self.autonomy = self.full_autonomy
-        
-    # ---------------------------------------------------------------------------------------------------------
-
     def idle(self, time_of_day):
         battery_threshold = float(os.getenv("AUTONOMY_TOLERANCE"))
-        
-        # Determine the idle probability based on the time of day
-        idle_probabilities = {
-            "rush_hour": float(os.getenv("CHANCE_OF_STAYING_IDLE_RUSH_HOUR")),
-            "lunch_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_LUNCH_TIME")),
-            "night_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_NIGHT_TIME")),
-            "dawn_time": float(os.getenv("CHANCE_OF_STAYING_IDLE_DAWN_TIME")),
-            "default": float(os.getenv("CHANCE_OF_STAYING_IDLE"))
-        }
-        idle_probability = idle_probabilities.get(time_of_day, idle_probabilities["default"])
-
+        idle_chance = self.idle_probabilities.get(time_of_day, self.idle_probabilities["default"])
         if self.get_battery_percentage() < battery_threshold:
             self.consider_charging()
-        elif random.random() >= idle_probability:
+        elif random.random() >= idle_chance:
             self.consider_traveling()
 
     # ---------------------------------------------------------------------------------------------------------
@@ -112,6 +109,7 @@ class Car:
         if random.random() < float(os.getenv("PROBABILITY_OF_CHARGING")):
             if self.current_region == self.home_region and random.random() < float(os.getenv("PROBABILITY_OF_CHARGING_AT_HOME")):
                 self.state = CHARGING_AT_HOME
+                self.home_region.cars_home_charging += 1
             else:
                 self.state = DECIDE_CHARGING
                 
@@ -205,7 +203,7 @@ class Car:
     def before_charging(self):
         if self.current_region.start_charging(self):
             self.stuck_at_region = False
-            self.state = CHARGING
+            self.exit_queue() # queue was empty
         else:
             self.state = IN_QUEUE
             
@@ -223,19 +221,26 @@ class Car:
     
     # ---------------------------------------------------------------------------------------------------------
     
-    def charging(self, at_home=False):
+    def charging(self, time_of_day, at_home=False):
         if self.autonomy >= self.full_autonomy:
             self.autonomy = self.full_autonomy
-            if not at_home:
-                self.current_region.stop_charging()
+            self.current_region.stop_charging(self.charging_time, at_home)
+            self.charging_time = 0
             self.state = IDLE
         else:
             charging_rate = float(os.getenv("CHARGING_PER_STEP_HOME")) if at_home else float(os.getenv("CHARGING_PER_STEP"))
             self.autonomy += charging_rate
-
+            self.charging_time += 1
             if not at_home and random.random() < self.stop_charging_probability():
+                self.current_region.stop_charging(self.charging_time, at_home)
+                self.charging_time = 0
                 self.state = IDLE 
-            elif at_home and random.random() < self.stop_charging_at_home_probability():
+            elif not self.stop_charging_at_home and at_home and random.random() < self.stop_charging_at_home_probability():
+                self.stop_charging_at_home = True
+            elif self.stop_charging_at_home and random.random() < self.idle_probabilities.get(time_of_day, self.idle_probabilities["default"]):
+                self.current_region.stop_charging(self.charging_time, at_home)
+                self.charging_time = 0
+                self.stop_charging_at_home = False
                 self.consider_traveling()
 
     def stop_charging_probability(self):
@@ -250,14 +255,11 @@ class Car:
         if battery_perc < 30:
             return 0
         else:
-            return (battery_perc - 30) / 1000  # Linearly increase from 0 to 5% probability 
+            return (battery_perc - 30) / 100  # Linearly increase from 0 to 70% probability 
             
     # ---------------------------------------------------------------------------------------------------------
 
     def run(self, time_of_day):
-        if self.displayed:
-            self.logger.log(f"{self.id} {self.state}")
-        self.home_region.update_autonomy(self.get_battery_percentage() * 100)
         if self.state == IDLE:
             self.idle(time_of_day)
         elif self.state == TRAVELING:
@@ -269,8 +271,11 @@ class Car:
         elif self.state == IN_QUEUE:
             self.in_queue()
         elif self.state == CHARGING:
-            self.charging()
+            self.charging(time_of_day, at_home=False)
         elif self.state == CHARGING_AT_HOME:
-            self.charging(at_home=True)
+            self.charging(time_of_day, at_home=True)
+        self.home_region.update_autonomy(self.get_battery_percentage())
+        if self.displayed:
+            self.logger.log(f"{self.id} {self.state}")
             
 # -------------------------------------------------------------------------------------------------------------
