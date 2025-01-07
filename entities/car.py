@@ -233,11 +233,10 @@ class Car:
             charging_rate = float(os.getenv("CHARGING_PER_STEP_HOME")) if at_home else float(os.getenv("CHARGING_PER_STEP"))
             self.autonomy += charging_rate
 
-            if random.random() < self.stop_charging_probability():
-                print("Car stopped charging early")
-                if not at_home:
-                    self.current_region.stop_charging()
-                self.state = IDLE         
+            if not at_home and random.random() < self.stop_charging_probability():
+                self.state = IDLE 
+            elif at_home and random.random() < self.stop_charging_at_home_probability():
+                self.consider_traveling()
 
     def stop_charging_probability(self):
         battery_perc = self.get_battery_percentage()
@@ -245,6 +244,13 @@ class Car:
             return 0
         else:
             return (battery_perc - 50) / 1000  # Linearly increase from 0 to 5% probability 
+        
+    def stop_charging_at_home_probability(self):
+        battery_perc = self.get_battery_percentage()
+        if battery_perc < 30:
+            return 0
+        else:
+            return (battery_perc - 30) / 1000  # Linearly increase from 0 to 5% probability 
             
     # ---------------------------------------------------------------------------------------------------------
 
