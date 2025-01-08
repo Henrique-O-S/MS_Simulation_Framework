@@ -47,12 +47,20 @@ class Region:
         self.average_charging_time = 0
         
         # history
-        self.home_time_history = []
-        self.charger_history = []
-        self.queue_history = []
-        self.stress_history = []
-        self.wait_history = []
-        self.charging_time_history = []
+        self.history = {
+            'cars_present': [],
+            'cars_home_charging': [],
+            'available_chargers': [],
+            'queued_cars': [],
+            'cars_charged': [],
+            'average_autonomy': [],
+            'average_home_time': [],
+            'charger_utilization': [],
+            'average_queue_size': [],
+            'stress_metric': [],
+            'average_wait_time': [],
+            'average_charging_time': []
+        }
         
     # ---------------------------------------------------------------------------------------------------------
 
@@ -115,25 +123,23 @@ class Region:
         self.average_queue_size = round(self.queue.qsize() / self.chargers, 2)
         ALFA = 1
         self.stress_metric = round(1 - (self.available_chargers / self.chargers) + ALFA * (self.queue.qsize() / self.chargers), 2)
-        self.home_time_history.append(round(self.average_home_time, 2))
-        self.charger_history.append(round(self.charger_utilization, 2))
-        self.queue_history.append(round(self.average_queue_size, 2))
-        self.stress_history.append(round(self.stress_metric, 2))
-        self.wait_history.append(round(self.average_wait_time, 2))
-        self.charging_time_history.append(round(self.average_charging_time, 2))
+        self.history['cars_present'].append(self.cars_present)
+        self.history['cars_home_charging'].append(self.cars_home_charging)
+        self.history['available_chargers'].append(self.available_chargers)
+        self.history['queued_cars'].append(self.queued_cars)
+        self.history['cars_charged'].append(self.cars_charged)
+        self.history['average_autonomy'].append(round(self.average_autonomy, 2))
+        self.history['average_home_time'].append(round(self.average_home_time, 2))
+        self.history['charger_utilization'].append(round(self.charger_utilization, 2))
+        self.history['average_queue_size'].append(round(self.average_queue_size, 2))
+        self.history['stress_metric'].append(round(self.stress_metric, 2))
+        self.history['average_wait_time'].append(round(self.average_wait_time, 2))
+        self.history['average_charging_time'].append(round(self.average_charging_time, 2))
         
     # ---------------------------------------------------------------------------------------------------------
         
     def save_history(self):
-        history = {
-            "home_time": self.home_time_history,
-            "charger": self.charger_history,
-            "queue": self.queue_history,
-            "stress": self.stress_history,
-            "wait": self.wait_history,
-            "charging_time": self.charging_time_history
-        }
         with open('logs/outputs/' + self.id + '.json', 'w') as f:
-            json.dump(history, f)
+            json.dump(self.history, f)
 
 # -------------------------------------------------------------------------------------------------------------
