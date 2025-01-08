@@ -14,182 +14,165 @@
         <div id="clock">00:00:00</div>
         <div id="warning">Rush Hour!</div>
     </div>
-    <div id="map"></div>
-    <table id="metrics">
-        <tr>
-            <th>Region</th>
-            <th>Cars Present</th>
-            <th>Home Charging</th>
-            <th>Available Chargers</th>
-            <th>Cars Waiting</th>
-            <th>Cars Charged</th>
-            <th>Avg Car Battery (%)</th>
-        </tr>
-        <tr>
-            <td>Aldoar</td>
-            <td id="aldoar_cars">0</td>
-            <td id="aldoar_home">0</td>
-            <td id="aldoar_chargers">0</td>
-            <td id="aldoar_queue">0</td>
-            <td id="aldoar_charged">0</td>
-            <td id="aldoar_battery">0</td>
-        </tr>
-        <tr>
-            <td>Ramalde</td>
-            <td id="ramalde_cars">0</td>
-            <td id="ramalde_home">0</td>
-            <td id="ramalde_chargers">0</td>
-            <td id="ramalde_queue">0</td>
-            <td id="ramalde_charged">0</td>
-            <td id="ramalde_battery">0</td>
-        </tr>
-        <tr>
-            <td>Paranhos</td>
-            <td id="paranhos_cars">0</td>
-            <td id="paranhos_home">0</td>
-            <td id="paranhos_chargers">0</td>
-            <td id="paranhos_queue">0</td>
-            <td id="paranhos_charged">0</td>
-            <td id="paranhos_battery">0</td>
-        </tr>
-        <tr>
-            <td>Lordelo</td>
-            <td id="lordelo_cars">0</td>
-            <td id="lordelo_home">0</td>
-            <td id="lordelo_chargers">0</td>
-            <td id="lordelo_queue">0</td>
-            <td id="lordelo_charged">0</td>
-            <td id="lordelo_battery">0</td>
-        </tr>
-        <tr>
-            <td>Centro</td>
-            <td id="centro_cars">0</td>
-            <td id="centro_home">0</td>
-            <td id="centro_chargers">0</td>
-            <td id="centro_queue">0</td>
-            <td id="centro_charged">0</td>
-            <td id="centro_battery">0</td>
-        </tr>
-        <tr>
-            <td>Bonfim</td>
-            <td id="bonfim_cars">0</td>
-            <td id="bonfim_home">0</td>
-            <td id="bonfim_chargers">0</td>
-            <td id="bonfim_queue">0</td>
-            <td id="bonfim_charged">0</td>
-            <td id="bonfim_battery">0</td>
-        </tr>
-        <tr>
-            <td>Campanhã</td>
-            <td id="campanha_cars">0</td>
-            <td id="campanha_home">0</td>
-            <td id="campanha_chargers">0</td>
-            <td id="campanha_queue">0</td>
-            <td id="campanha_charged">0</td>
-            <td id="campanha_battery">0</td>
-        </tr>
-        <tr>
-            <td>Porto</td>
-            <td id="porto_cars">0</td>
-            <td id="porto_home">0</td>
-            <td id="porto_chargers">0</td>
-            <td id="porto_queue">0</td>
-            <td id="porto_charged">0</td>
-            <td id="porto_battery">0</td>
-        </tr>
-    </table>
-    <table id="kpis">
-        <tr>
-            <th>Region</th>
-            <th>Avg Home Charging Time (min)</th>
-            <th>Charger Utilization (%)</th>
-            <th>Regional Imbalance (%)</th>
-            <th>Avg Queue Size</th>
-            <th>Stress Level</th>
-            <th>Avg Wait Time (min)</th>
-            <th>Avg Charging Time (min)</th>
-        </tr>
-        <tr>
-            <td>Aldoar</td>
-            <td id="aldoar_home_time">0</td>
-            <td id="aldoar_charger_utilization">0</td>
-            <td id="aldoar_regional_imbalance">-</td>
-            <td id="aldoar_queue_size">0</td>
-            <td id="aldoar_stress">0</td>
-            <td id="aldoar_wait">0</td>
-            <td id="aldoar_charging">0</td>
-        </tr>
-        <tr>
-            <td>Ramalde</td>
-            <td id="ramalde_home_time">0</td>
-            <td id="ramalde_charger_utilization">0</td>
-            <td id="ramalde_regional_imbalance">-</td>
-            <td id="ramalde_queue_size">0</td>
-            <td id="ramalde_stress">0</td>
-            <td id="ramalde_wait">0</td>
-            <td id="ramalde_charging">0</td>
-        </tr>
-        <tr>
-            <td>Paranhos</td>
-            <td id="paranhos_home_time">0</td>
-            <td id="paranhos_charger_utilization">0</td>
-            <td id="paranhos_regional_imbalance">-</td>
-            <td id="paranhos_queue_size">0</td>
-            <td id="paranhos_stress">0</td>
-            <td id="paranhos_wait">0</td>
-            <td id="paranhos_charging">0</td>
-        </tr>
-        <tr>
-            <td>Lordelo</td>
-            <td id="lordelo_home_time">0</td>
-            <td id="lordelo_charger_utilization">0</td>
-            <td id="lordelo_regional_imbalance">-</td>
-            <td id="lordelo_queue_size">0</td>
-            <td id="lordelo_stress">0</td>
-            <td id="lordelo_wait">0</td>
-            <td id="lordelo_charging">0</td>
-        </tr>
-        <tr>
-            <td>Centro</td>
-            <td id="centro_home_time">0</td>
-            <td id="centro_charger_utilization">0</td>
-            <td id="centro_regional_imbalance">-</td>
-            <td id="centro_queue_size">0</td>
-            <td id="centro_stress">0</td>
-            <td id="centro_wait">0</td>
-            <td id="centro_charging">0</td>
-        </tr>
-        <tr>
-            <td>Bonfim</td>
-            <td id="bonfim_home_time">0</td>
-            <td id="bonfim_charger_utilization">0</td>
-            <td id="bonfim_regional_imbalance">-</td>
-            <td id="bonfim_queue_size">0</td>
-            <td id="bonfim_stress">0</td>
-            <td id="bonfim_wait">0</td>
-            <td id="bonfim_charging">0</td>
-        </tr>
-        <tr>
-            <td>Campanhã</td>
-            <td id="campanha_home_time">0</td>
-            <td id="campanha_charger_utilization">0</td>
-            <td id="campanha_regional_imbalance">-</td>
-            <td id="campanha_queue_size">0</td>
-            <td id="campanha_stress">0</td>
-            <td id="campanha_wait">0</td>
-            <td id="campanha_charging">0</td>
-        </tr>
-        <tr>
-            <td>Porto</td>
-            <td id="porto_home_time">0</td>
-            <td id="porto_charger_utilization">0</td>
-            <td id="porto_regional_imbalance">0</td>
-            <td id="porto_queue_size">0</td>
-            <td id="porto_stress">0</td>
-            <td id="porto_wait">0</td>
-            <td id="porto_charging">0</td>
-        </tr>
-    </table>
+    <section>
+        <div id="map"></div>
+        <table id="metrics">
+            <tr>
+                <th></th>
+                <th>Aldoar</th>
+                <th>Ramalde</th>
+                <th>Paranhos</th>
+                <th>Lordelo</th>
+                <th>Centro</th>
+                <th>Bonfim</th>
+                <th>Campanhã</th>
+                <th>Porto</th>
+            </tr>
+            <tr>
+                <td class="kpi">Avg Home Charging Time (min)</td>
+                <td class="kpi" id="aldoar_home_time">0</td>
+                <td class="kpi" id="ramalde_home_time">0</td>
+                <td class="kpi" id="paranhos_home_time">0</td>
+                <td class="kpi" id="lordelo_home_time">0</td>
+                <td class="kpi" id="centro_home_time">0</td>
+                <td class="kpi" id="bonfim_home_time">0</td>
+                <td class="kpi" id="campanha_home_time">0</td>
+                <td class="kpi" id="porto_home_time">0</td>
+            </tr>
+            <tr>
+                <td class="kpi">Charger Utilization (%)</td>
+                <td class="kpi" id="aldoar_charger_utilization">0</td>
+                <td class="kpi" id="ramalde_charger_utilization">0</td>
+                <td class="kpi" id="paranhos_charger_utilization">0</td>
+                <td class="kpi" id="lordelo_charger_utilization">0</td>
+                <td class="kpi" id="centro_charger_utilization">0</td>
+                <td class="kpi" id="bonfim_charger_utilization">0</td>
+                <td class="kpi" id="campanha_charger_utilization">0</td>
+                <td class="kpi" id="porto_charger_utilization">0</td>
+            </tr>
+            <tr>
+                <td class="kpi">Regional Imbalance (%)</td>
+                <td class="kpi" id="aldoar_regional_imbalance">-</td>
+                <td class="kpi" id="ramalde_regional_imbalance">-</td>
+                <td class="kpi" id="paranhos_regional_imbalance">-</td>
+                <td class="kpi" id="lordelo_regional_imbalance">-</td>
+                <td class="kpi" id="centro_regional_imbalance">-</td>
+                <td class="kpi" id="bonfim_regional_imbalance">-</td>
+                <td class="kpi" id="campanha_regional_imbalance">-</td>
+                <td class="kpi" id="porto_regional_imbalance">-</td>
+            </tr>
+            <tr>
+                <td class="kpi">Avg Queue Size</td>
+                <td class="kpi" id="aldoar_queue_size">0</td>
+                <td class="kpi" id="ramalde_queue_size">0</td>
+                <td class="kpi" id="paranhos_queue_size">0</td>
+                <td class="kpi" id="lordelo_queue_size">0</td>
+                <td class="kpi" id="centro_queue_size">0</td>
+                <td class="kpi" id="bonfim_queue_size">0</td>
+                <td class="kpi" id="campanha_queue_size">0</td>
+                <td class="kpi" id="porto_queue_size">0</td>
+            </tr>
+            <tr>
+                <td class="kpi">Stress Level</td>
+                <td class="kpi" id="aldoar_stress">0</td>
+                <td class="kpi" id="ramalde_stress">0</td>
+                <td class="kpi" id="paranhos_stress">0</td>
+                <td class="kpi" id="lordelo_stress">0</td>
+                <td class="kpi" id="centro_stress">0</td>
+                <td class="kpi" id="bonfim_stress">0</td>
+                <td class="kpi" id="campanha_stress">0</td>
+                <td class="kpi" id="porto_stress">0</td>
+            </tr>
+            <tr>
+                <td class="kpi">Avg Wait Time (min)</td>
+                <td class="kpi" id="aldoar_wait">0</td>
+                <td class="kpi" id="ramalde_wait">0</td>
+                <td class="kpi" id="paranhos_wait">0</td>
+                <td class="kpi" id="lordelo_wait">0</td>
+                <td class="kpi" id="centro_wait">0</td>
+                <td class="kpi" id="bonfim_wait">0</td>
+                <td class="kpi" id="campanha_wait">0</td>
+                <td class="kpi" id="porto_wait">0</td>
+            </tr>
+            <tr>
+                <td class="kpi">Avg Charging Time (min)</td>
+                <td class="kpi" id="aldoar_charging">0</td>
+                <td class="kpi" id="ramalde_charging">0</td>
+                <td class="kpi" id="paranhos_charging">0</td>
+                <td class="kpi" id="lordelo_charging">0</td>
+                <td class="kpi" id="centro_charging">0</td>
+                <td class="kpi" id="bonfim_charging">0</td>
+                <td class="kpi" id="campanha_charging">0</td>
+                <td class="kpi" id="porto_charging">0</td>
+            </tr>
+            <tr>
+                <td class="metric">Cars Present</td>
+                <td id="aldoar_cars">0</td>
+                <td id="ramalde_cars">0</td>
+                <td id="paranhos_cars">0</td>
+                <td id="lordelo_cars">0</td>
+                <td id="centro_cars">0</td>
+                <td id="bonfim_cars">0</td>
+                <td id="campanha_cars">0</td>
+                <td id="porto_cars">0</td>
+            </tr>
+            <tr>
+                <td class="metric">Home Charging</td>
+                <td id="aldoar_home">0</td>
+                <td id="ramalde_home">0</td>
+                <td id="paranhos_home">0</td>
+                <td id="lordelo_home">0</td>
+                <td id="centro_home">0</td>
+                <td id="bonfim_home">0</td>
+                <td id="campanha_home">0</td>
+                <td id="porto_home">0</td>
+            </tr>
+            <tr>
+                <td class="metric">Available Chargers</td>
+                <td id="aldoar_chargers">0</td>
+                <td id="ramalde_chargers">0</td>
+                <td id="paranhos_chargers">0</td>
+                <td id="lordelo_chargers">0</td>
+                <td id="centro_chargers">0</td>
+                <td id="bonfim_chargers">0</td>
+                <td id="campanha_chargers">0</td>
+                <td id="porto_chargers">0</td>
+            </tr>
+            <tr>
+                <td class="metric">Cars Waiting</td>
+                <td id="aldoar_queue">0</td>
+                <td id="ramalde_queue">0</td>
+                <td id="paranhos_queue">0</td>
+                <td id="lordelo_queue">0</td>
+                <td id="centro_queue">0</td>
+                <td id="bonfim_queue">0</td>
+                <td id="campanha_queue">0</td>
+                <td id="porto_queue">0</td>
+            </tr>
+            <tr>
+                <td class="metric">Cars Charged</td>
+                <td id="aldoar_charged">0</td>
+                <td id="ramalde_charged">0</td>
+                <td id="paranhos_charged">0</td>
+                <td id="lordelo_charged">0</td>
+                <td id="centro_charged">0</td>
+                <td id="bonfim_charged">0</td>
+                <td id="campanha_charged">0</td>
+                <td id="porto_charged">0</td>
+            </tr>
+            <tr>
+                <td class="metric">Avg Car Battery (%)</td>
+                <td id="aldoar_battery">0</td>
+                <td id="ramalde_battery">0</td>
+                <td id="paranhos_battery">0</td>
+                <td id="lordelo_battery">0</td>
+                <td id="centro_battery">0</td>
+                <td id="bonfim_battery">0</td>
+                <td id="campanha_battery">0</td>
+                <td id="porto_battery">0</td>
+            </tr>
+        </table>
+    </section>
 
     <script>
 

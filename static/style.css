@@ -18,8 +18,13 @@
     display: none; /* Initially hidden */
 }
 
+section {
+    display: flex;
+    gap: 10px;
+}
+
 #map {
-    height: 50vh;
+    height: 90vh;
     width: 60%;
 }
 
@@ -36,40 +41,37 @@
     border: 1px solid black;
     text-align: center;
     padding: 4px;
-    width: 120px;
-    height: 20px;
+    width: auto;
+    height: 10px;
 }
 
 #metrics th {
-    background-color: #b4b5e9;
-}
-
-#metrics tr:last-child td {
+    background-color: #3539a1;
+    color: white;
     font-weight: bold;
+    padding: 0 0.5em;
 }
 
-#kpis {
-    border-collapse: collapse;
-    width: auto;
-    font-size: 14px;
-    table-layout: fixed;
+#metrics tr:first-child > th:first-child {
     background-color: white;
-    background-color: rgb(229, 229, 229);
+    border: none;
 }
 
-#kpis th, #kpis td {
-    border: 1px solid black;
-    text-align: center;
-    padding: 4px;
-    width: 120px;
-    height: 20px;
+#metrics td.kpi {
+    background-color: rgb(178, 223, 207);
 }
 
-#kpis th {
-    background-color: #b4b5e9;
+#metrics tr td.kpi:first-of-type {
+    background-color: rgb(86, 203, 160);
+    text-align: left;
 }
 
-#kpis tr:last-child td {
-    font-weight: bold;
+#metrics td.metric {
+    background-color: rgb(211, 193, 120);
+}
+
+#metrics tr td.metric:first-of-type {
+    background-color: rgb(207, 157, 71);
+    text-align: left;
 }
 
