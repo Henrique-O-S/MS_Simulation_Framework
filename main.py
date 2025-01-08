@@ -88,8 +88,10 @@ class Application:
     
     # ---------------------------------------------------------------------------------------------------------
 
-    def main(self):  
+    def main(self):
         region_file = "data/regions.csv"
+        if (int(os.getenv("REGION_IMPROVEMENT")) == 1):
+            region_file = "data/regions_improved.csv"
         regions = []
         if os.path.exists(region_file):
             self.read_region_data(region_file, regions)
