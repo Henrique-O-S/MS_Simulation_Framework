@@ -286,8 +286,8 @@
                     porto_metrics['home'] += region.home_charging;
                     document.getElementById(region.name.toLowerCase() + '_chargers').innerText = region.available_chargers;
                     porto_metrics['chargers'] += region.available_chargers;
-                    document.getElementById(region.name.toLowerCase() + '_queue').innerText = region.queue_size;
-                    porto_metrics['queue'] += region.queue_size;
+                    document.getElementById(region.name.toLowerCase() + '_queue').innerText = region.queued_cars;
+                    porto_metrics['queue'] += region.queued_cars;
                     document.getElementById(region.name.toLowerCase() + '_charged').innerText = region.cars_charged;
                     porto_metrics['charged'] += region.cars_charged;
                     document.getElementById(region.name.toLowerCase() + '_battery').innerText = region.autonomy;
