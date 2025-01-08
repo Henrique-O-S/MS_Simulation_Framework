@@ -90,8 +90,9 @@ class Application:
 
     def main(self):
         region_file = "data/regions.csv"
-        if (int(os.getenv("REGION_IMPROVEMENT")) == 1):
-            region_file = "data/regions_improved.csv"
+        improvement_level = int(os.getenv("REGION_IMPROVEMENT"))
+        if (improvement_level != 0):
+            region_file = "data/regions_improved_" + str(improvement_level) + ".csv"
         regions = []
         if os.path.exists(region_file):
             self.read_region_data(region_file, regions)
@@ -107,7 +108,6 @@ class Application:
         simulation = Simulation(cars, regions, self.app, self.socketio)
         print("\nStarting simulation...")
         simulation.run(steps=int(os.getenv("STEPS_PER_DAY"))*int(os.getenv("NUMBER_OF_DAYS"))) 
-        print("Simulation ended.")
         
 # -------------------------------------------------------------------------------------------------------------
 

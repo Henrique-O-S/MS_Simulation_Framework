@@ -25,14 +25,6 @@ class Simulation:
         for region in self.regions:
             region.run()
         self.visualization.update_visualization(step, self.time_of_day)
-        if self.check_simulation_end():
-            self.visualization.signal_end()
-            self.running = False
-            
-    # ---------------------------------------------------------------------------------------------------------
-
-    def check_simulation_end(self):
-        return False
     
     # ---------------------------------------------------------------------------------------------------------
     
@@ -64,6 +56,7 @@ class Simulation:
             time.sleep(1 / 60)
         for region in self.regions:
             region.save_history()
+        self.visualization.signal_end()
             
 # -------------------------------------------------------------------------------------------------------------
 
