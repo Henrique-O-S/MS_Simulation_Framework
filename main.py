@@ -20,7 +20,7 @@ from entities.car import Car
 load_dotenv()
 
 # -------------------------------------------------------------------------------------------------------------
-
+ 
 class Application:
     def __init__(self):
         self.delete_logs()
