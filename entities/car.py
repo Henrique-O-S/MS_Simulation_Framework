@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 
 # -------------------------------------------------------------------------------------------------------------
 
+os.environ.clear()
 load_dotenv()
 
 TRAVELING = "[Traveling]"

@@ -17,11 +17,19 @@ from entities.car import Car
 
 # -------------------------------------------------------------------------------------------------------------
 
+os.environ.clear()
 load_dotenv()
 
 # -------------------------------------------------------------------------------------------------------------
  
 class Application:
+    '''
+    The Application class initializes and runs a Flask web application with SocketIO support.
+    
+    Attributes:
+        app (Flask): The Flask web application instance.
+        socketio (SocketIO): The SocketIO instance for real-time communication.
+    '''
     def __init__(self):
         self.delete_logs()
         self.app = Flask(__name__)
@@ -34,6 +42,9 @@ class Application:
     # ---------------------------------------------------------------------------------------------------------
         
     def delete_logs(self): 
+        """
+        Deletes all logs in the 'logs/outputs/' directory.
+        """
         folder = "logs/outputs/"
         for filename in os.listdir(folder):
             if filename != ".gitignore":
@@ -46,6 +57,13 @@ class Application:
     # ---------------------------------------------------------------------------------------------------------
 
     def read_region_data(self, filename, regions):
+        """
+        Reads region data from a CSV file and appends it to the provided regions list.
+
+        Args:
+            filename (str): The path to the CSV file containing the region data.
+            regions (list): A list to which the parsed Region objects will be appended.
+        """
         with open(filename, "r") as csvfile:
             reader = csv.reader(csvfile, delimiter=";")
             next(reader) 
@@ -63,6 +81,13 @@ class Application:
     # ---------------------------------------------------------------------------------------------------------
 
     def read_car_model_data(self, filename, cars):
+        """
+        Reads car model data from a CSV file and appends it to the provided list of car models.
+
+        Args:
+            filename (str): The path to the CSV file containing car model data.
+            cars (list): A list to which the car models will be appended. Each car model is an instance of the CarModel class.
+        """
         with open(filename, "r") as csvfile:
             reader = csv.reader(csvfile, delimiter=";")
             next(reader)
@@ -75,6 +100,16 @@ class Application:
     # ---------------------------------------------------------------------------------------------------------
     
     def generate_cars(self, car_models, regions):
+        """
+        Generates a list of Car objects based on the provided car models and regions.
+
+        Args:
+            car_models (list): A list of car model objects to be used for generating cars.
+            regions (list): A list of region objects where the cars will be generated.
+
+        Returns:
+            list: A list of Car objects generated for the specified regions and car models.
+        """
         cars_data = CarSeeder(car_models, regions).run()
         cars = []
         for region in regions:
@@ -89,6 +124,9 @@ class Application:
     # ---------------------------------------------------------------------------------------------------------
 
     def main(self):
+        """
+        Main function to initialize and run the simulation.
+        """
         region_file = "data/regions.csv"
         improvement_level = int(os.getenv("REGION_IMPROVEMENT"))
         if (improvement_level != 0):
