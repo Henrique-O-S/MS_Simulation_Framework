@@ -2,7 +2,6 @@
 
 * Diogo Silva - up202004288@up.pt
 * Henrique Silva - up202007242@up.pt
-* João Araújo - up202004293@up.pt
 * Tiago Branquinho - up202005567@up.pt
 
 ## How to Build and Run
