@@ -6,8 +6,13 @@ from math import radians, sin, cos, sqrt, atan2
 
 def extract_numeric_value(value_str):
     """
-    Extracts the numeric value from a string containing numeric value followed by units.
-    Example: "20km/h" -> 20
+    Extracts the numeric part from a given string and converts it to a float.
+
+    Args:
+        value_str (str): The string containing the numeric value.
+
+    Returns:
+        float: The extracted numeric value as a float, or None if no numeric part is found.
     """
     numeric_part = ""
     for char in value_str:
@@ -21,17 +26,16 @@ def extract_numeric_value(value_str):
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     """
-    Calculate the distance between two points on the Earth's surface
-    using the Haversine formula.
+    Calculate the Haversine distance between two points on the Earth specified by their latitude and longitude.
 
-    Parameters:
-    lat1 (float): Latitude of the first point in degrees.
-    lon1 (float): Longitude of the first point in degrees.
-    lat2 (float): Latitude of the second point in degrees.
-    lon2 (float): Longitude of the second point in degrees.
+    Args:
+        lat1 (float): Latitude of the first point in decimal degrees.
+        lon1 (float): Longitude of the first point in decimal degrees.
+        lat2 (float): Latitude of the second point in decimal degrees.
+        lon2 (float): Longitude of the second point in decimal degrees.
 
     Returns:
-    float: Distance between the two points in kilometers.
+        float: Distance between the two points in kilometers.
     """
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
     dlon = lon2 - lon1
@@ -114,7 +118,14 @@ region_distances = {
 
 def calculate_angle(pos1, pos2):
     """
-    Calculate the angle between two points.
+    Calculate the angle between two geographical positions.
+
+    Args:
+        pos1 (tuple): A tuple containing the latitude and longitude of the first position (lat1, lon1).
+        pos2 (tuple): A tuple containing the latitude and longitude of the second position (lat2, lon2).
+
+    Returns:
+        float: The angle between the two positions in radians.
     """
     lat1, lon1 = pos1
     lat2, lon2 = pos2
@@ -124,7 +135,15 @@ def calculate_angle(pos1, pos2):
 
 def stepsToTime(step, steps_per_day):
     """
-    Convert the number of steps to a time string in the format HH:MM.
+    Convert a given step count into a formatted time string.
+
+    Args:
+        step (int): The current step count.
+        steps_per_day (int): The total number of steps in a day.
+
+    Returns:
+        str: A formatted string representing the day, hours, and minutes.
+             Format: "Day {day}    -    {hours:02d} : {minutes:02d} h"
     """
     day = step // steps_per_day
     step = step % steps_per_day
@@ -132,10 +151,20 @@ def stepsToTime(step, steps_per_day):
     minutes = (step % (steps_per_day // 24)) * 60 // (steps_per_day // 24)
     return f"Day {day + 1}    -    {hours:02d} : {minutes:02d} h"
 
+# -------------------------------------------------------------------------------------------------------------
 
 def isBetweenHours(hour, hour2, step, steps_per_day):
     """
-    Check if the current time is between the specified time.
+    Determines if a given step falls between two specified hours within a day.
+
+    Args:
+        hour (int): The starting hour (0-23).
+        hour2 (int): The ending hour (0-23).
+        step (int): The current step.
+        steps_per_day (int): The total number of steps in a day.
+
+    Returns:
+        bool: True if the step falls between the specified hours, False otherwise.
     """
     step = step % steps_per_day
     return step % steps_per_day >= steps_per_day * hour / 24 and step % steps_per_day <= steps_per_day * hour2 / 24

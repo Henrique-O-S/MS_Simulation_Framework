@@ -25,6 +25,37 @@ IN_QUEUE = "[InQueue]"
 # -------------------------------------------------------------------------------------------------------------
 
 class Car:
+    """
+    Represents a car in the simulation.
+
+    Attributes:
+        id (int): Unique identifier for the car.
+        full_autonomy (float): The maximum autonomy of the car in kilometers.
+        autonomy (float): The current autonomy of the car in kilometers.
+        velocity (float): The velocity of the car in kilometers per step.
+        current_region (Region): The current region where the car is located.
+        home_region (Region): The home region of the car.
+        latitude (float): The current latitude of the car.
+        longitude (float): The current longitude of the car.
+        distance_travelled (float): The total distance travelled by the car.
+        wait_time (int): The time the car has spent waiting.
+        charging_time (int): The time the car has spent charging.
+        regions (list): List of all regions in the simulation.
+        next_region (Region): The next region the car will travel to.
+        charge_at_destination (bool): Whether the car will charge at the destination.
+        stuck_at_region (bool): Whether the car is stuck at a region.
+        state (str): The current state of the car.
+        idle_probabilities (dict): Probabilities of the car staying idle at different times of the day.
+        displayed (bool): Whether the car is displayed in the simulation.
+        stepsToTravel (int): The number of steps required to travel to the next region.
+        currentTripSteps (int): The number of steps taken in the current trip.
+        distanceToTravel (float): The distance to travel to the next region.
+        logger (Logger): Logger instance for logging car activities.
+        availabilityWeigh (float): Weight for availability in the decision-making process.
+        distanceWeight (float): Weight for distance in the decision-making process.
+        queueWeigh (float): Weight for queue size in the decision-making process.
+        stop_charging_at_home (bool): Whether the car should stop charging at home.
+    """
     def __init__(self, id, autonomy, velocity, current_region, regions):
         self.id = id
         self.full_autonomy = autonomy
@@ -63,11 +94,20 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
 
     def get_battery_percentage(self):
+        """
+        Calculate the battery percentage of the car.
+
+        Returns:
+            float: The current battery percentage based on the car's autonomy and full autonomy.
+        """
         return (self.autonomy / self.full_autonomy) * 100
     
     # ---------------------------------------------------------------------------------------------------------
     
     def arrived_at_destination(self):
+        """
+        Updates the car's current region to the next region and adjusts the count of cars present in each region.
+        """
         self.current_region.cars_present -= 1
         self.current_region = self.next_region
         self.current_region.cars_present += 1
@@ -76,11 +116,26 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
 
     def reachable_regions(self):
+        """
+        Determines the regions that are reachable from the current region based on the car's autonomy.
+
+        Returns:
+            list: A list of regions that are within the car's autonomy range from the current region.
+        """
         return [region for region in self.regions if region_distances[self.current_region.id][region.id] < self.autonomy]
     
     # ---------------------------------------------------------------------------------------------------------
 
     def pick_next_region(self):
+        """
+        Selects the next region for the car to move to from the list of reachable regions, 
+        excluding the current region. If no valid regions are available, returns None. 
+        The selection is weighted by the traffic in each region, with the home region 
+        having a fixed traffic weight of 30.
+
+        Returns:
+            Region: The next region to move to, or None if no valid regions are available.
+        """
         valid_regions = [region for region in self.reachable_regions() if region != self.current_region]
         if not valid_regions:
             return None
@@ -90,6 +145,15 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
 
     def next_pos(self, angle):
+        """
+        Calculate the next position of the car based on the given angle.
+
+        Args:
+            angle (float): The angle in radians at which the car is moving.
+
+        Returns:
+            tuple: A tuple containing the new latitude and longitude of the car.
+        """
         new_latitude = self.latitude + self.velocity * sin(angle) / 111.2
         new_longitude = self.longitude + self.velocity * cos(angle) / (111.2 * cos(radians(self.latitude)))
         return new_latitude, new_longitude
@@ -97,6 +161,12 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
 
     def idle(self, time_of_day):
+        """
+        Determines the car's behavior based on the time of day and battery level.
+
+        Args:
+            time_of_day (str): The current time of day, used to determine idle probabilities.
+        """
         battery_threshold = float(os.getenv("AUTONOMY_TOLERANCE"))
         idle_chance = self.idle_probabilities.get(time_of_day, self.idle_probabilities["default"])
         if self.get_battery_percentage() < battery_threshold:
@@ -107,6 +177,9 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
 
     def consider_charging(self):
+        """
+        Determine whether the car should start charging based on random probabilities and its current region.
+        """
         if random.random() < float(os.getenv("PROBABILITY_OF_CHARGING")):
             if self.current_region == self.home_region and random.random() < float(os.getenv("PROBABILITY_OF_CHARGING_AT_HOME")):
                 self.state = CHARGING_AT_HOME
@@ -117,6 +190,9 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
 
     def consider_traveling(self):
+        """
+        Determines the next region for the car to travel to and updates the car's state accordingly.
+        """
         next_region = self.pick_next_region()
         if next_region:
             self.next_region = next_region
@@ -128,6 +204,22 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
                         
     def traveling(self):
+        """
+        Handles the movement of the car towards its next destination.
+
+        If the car is displayed, it calculates the angle and the next position,
+        then updates the car's latitude and longitude based on the calculated
+        future movement. It also updates the car's autonomy and distance travelled.
+        If the car reaches its destination, it updates the state accordingly.
+
+        If the car is not displayed and stepsToTravel is 0, it calculates the
+        distance to travel and the number of steps required to reach the destination.
+
+        If the car is not displayed and stepsToTravel is greater than 0, it updates
+        the current trip steps and checks if the car has reached its destination.
+        If the destination is reached, it updates the car's latitude, longitude,
+        autonomy, distance travelled, and state accordingly.
+        """
         if(self.displayed):
             angle = calculate_angle(
                 (self.latitude, self.longitude), (self.next_region.latitude, self.next_region.longitude))
@@ -136,7 +228,6 @@ class Car:
                 self.latitude, self.longitude, next_lat, next_long)
             distance = haversine_distance(
                 self.latitude, self.longitude, self.next_region.latitude, self.next_region.longitude)
-            
             if future_movement >= distance:
                 self.latitude = self.next_region.latitude
                 self.longitude = self.next_region.longitude
@@ -181,6 +272,11 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
             
     def decide_charging(self):
+        """
+        Determines the best region for the car to charge based on the availability of chargers,
+        the size of the queue, and the distance to the region. The decision is made by scoring
+        each reachable region and selecting the one with the highest score.
+        """
         reachable_regions = self.reachable_regions()
         responses = [(region, region.get_status()) for region in reachable_regions]
         def score(response):
@@ -202,6 +298,9 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
                     
     def before_charging(self):
+        """
+        Attempt to start charging the car in the current region.
+        """
         if self.current_region.start_charging(self):
             self.stuck_at_region = False
             self.exit_queue() # queue was empty
@@ -211,11 +310,18 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
 
     def in_queue(self):
+        """
+        This method should be called to simulate the car waiting in a queue.
+        Each call to this method increases the car's wait time by one unit.
+        """
         self.wait_time += 1
         
     # ---------------------------------------------------------------------------------------------------------
         
     def exit_queue(self):
+        """
+        Handles the logic for a car exiting the queue.
+        """
         self.current_region.update_wait_time(self.wait_time)
         self.wait_time = 0
         self.state = CHARGING
@@ -223,6 +329,13 @@ class Car:
     # ---------------------------------------------------------------------------------------------------------
     
     def charging(self, time_of_day, at_home=False):
+        """
+        Manages the charging process of the car.
+
+        Args:
+            time_of_day (str): The current time of day, used to determine idle probabilities.
+            at_home (bool): Indicates whether the car is charging at home. Defaults to False.
+        """
         if self.autonomy >= self.full_autonomy:
             self.autonomy = self.full_autonomy
             self.current_region.stop_charging(self.charging_time, at_home)
@@ -243,24 +356,51 @@ class Car:
                 self.charging_time = 0
                 self.stop_charging_at_home = False
                 self.consider_traveling()
+                
+    # ---------------------------------------------------------------------------------------------------------
 
     def stop_charging_probability(self):
+        """
+        Calculate the probability of stopping the charging process based on the current battery percentage.
+
+        Returns:
+            float: The probability of stopping the charging process. 
+                   If the battery percentage is less than 50%, the probability is 0.
+                   If the battery percentage is 50% or more, the probability increases linearly from 0 to 5%.
+        """
         battery_perc = self.get_battery_percentage()
         if battery_perc < 50:
             return 0
         else:
-            return (battery_perc - 50) / 1000  # Linearly increase from 0 to 5% probability 
+            return (battery_perc - 50) / 1000  # linearly increase from 0 to 5% probability 
+        
+    # ---------------------------------------------------------------------------------------------------------
         
     def stop_charging_at_home_probability(self):
+        """
+        Calculate the probability of stopping charging at home based on the current battery percentage.
+
+        Returns:
+            float: The probability of stopping charging at home. 
+                   Returns 0 if the battery percentage is less than 30%.
+                   Otherwise, returns a value linearly increasing from 0 to 0.7 as the battery percentage 
+                   increases from 30% to 100%.
+        """
         battery_perc = self.get_battery_percentage()
         if battery_perc < 30:
             return 0
         else:
-            return (battery_perc - 30) / 100  # Linearly increase from 0 to 70% probability 
+            return (battery_perc - 30) / 100  # linearly increase from 0 to 70% probability 
             
     # ---------------------------------------------------------------------------------------------------------
 
     def run(self, time_of_day):
+        """
+        Executes the behavior of the car based on its current state and the time of day.
+
+        Args:
+            time_of_day (int): The current time of day.
+        """
         if self.state == IDLE:
             self.idle(time_of_day)
         elif self.state == TRAVELING:
