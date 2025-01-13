@@ -88,6 +88,7 @@ class Simulation:
                 self.checkTimeOfDay(step)
                 self.run_step(step)
                 time.sleep(1 / 60)
+            print("\nSimulation completed.")
         except KeyboardInterrupt:
             print("\nSimulation interrupted.")
         finally:
@@ -195,7 +196,6 @@ class SimulationVisualization:
         Emit a 'simulation_end' signal and terminate the program.
         """
         self.socketio.emit('simulation_end', {})
-        print("\nSimulation ended.")
         os._exit(0)
             
 # -------------------------------------------------------------------------------------------------------------
